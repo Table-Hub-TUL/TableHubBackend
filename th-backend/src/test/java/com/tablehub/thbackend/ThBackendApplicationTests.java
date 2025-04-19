@@ -1,0 +1,13 @@
+package com.tablehub.thbackend;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class ThBackendApplicationTests {
+
+    @Test
+    void contextLoads() {
+    }
+
+}
