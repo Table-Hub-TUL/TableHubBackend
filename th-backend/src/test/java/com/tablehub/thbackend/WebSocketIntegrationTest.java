@@ -1,16 +1,10 @@
 package com.tablehub.thbackend;
 
 import java.net.URI;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -21,38 +15,16 @@ public class WebSocketIntegrationTest {
     public void testWebSocketEcho() throws Exception {
         String serverUri = "ws://localhost:8080/ws";
 
-        CountDownLatch latch = new CountDownLatch(1);
-        BlockingQueue<String> messages = new LinkedBlockingQueue<>();
+        MockWebSocketClient client = new MockWebSocketClient(new URI(serverUri));
 
-        WebSocketClient client = new WebSocketClient(new URI(serverUri)) {
-            @Override
-            public void onOpen(ServerHandshake handshake) {
-                send("Hello server");
-            }
-
-            @Override
-            public void onMessage(String message) {
-                System.out.println("📩 Client received: " + message); // <-- log it!
-                messages.offer(message);
-                latch.countDown();
-            }
-
-            @Override
-            public void onClose(int code, String reason, boolean remote) {}
-
-            @Override
-            public void onError(Exception ex) {
-                fail("WebSocket error: " + ex.getMessage());
-            }
-        };
-
-        boolean connected = client.connectBlocking(3, TimeUnit.SECONDS);
+        boolean connected = client.connectBlocking();
         assertTrue(connected, "WebSocket should connect");
 
-        boolean success = latch.await(5, TimeUnit.SECONDS);
-        assertTrue(success, "Should receive message within timeout");
+        client.awaitMessage(5, TimeUnit.SECONDS);
+        String response = client.getReceivedMessage();
 
-        String response = messages.poll(1, TimeUnit.SECONDS);
         assertEquals("Echo: Hello server", response);
+
+        client.close();
     }
 }
