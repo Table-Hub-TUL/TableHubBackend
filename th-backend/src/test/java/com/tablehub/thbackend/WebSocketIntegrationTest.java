@@ -23,7 +23,7 @@ public class WebSocketIntegrationTest {
         client.awaitMessage(5, TimeUnit.SECONDS);
         String response = client.getReceivedMessage();
 
-        assertEquals("Echo: Hello server", response);
+        assertEquals("{\"header\":{\"sender\":\"server\",\"messageId\":1,\"correlationId\":null,\"type\":\"LOGIN_SUCCESS\",\"accessToken\":\"ASDFASDFASDF\",\"timestamp\":1697030400000},\"body\":{\"expiresIn\":1000,\"password\":\"maslo\",\"username\":\"asdf\",\"points\":100}}", response);
 
         client.close();
     }
