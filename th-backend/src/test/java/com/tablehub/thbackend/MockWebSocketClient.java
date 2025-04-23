@@ -4,11 +4,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class MockWebSocketClient extends WebSocketClient {
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final CountDownLatch latch;
     private String receivedMessage;
@@ -20,7 +24,27 @@ public class MockWebSocketClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake handshakedata) {
-        send("Hello server");
+        HashMap<String, Object> header = new HashMap<>();
+        header.put("messageId", 1);
+        header.put("correlationId", null);
+        header.put("sender", "client");
+        header.put("type", "LOGIN_REQUEST");
+        header.put("accessToken", null);
+        header.put("timestamp", 1697030400000L);
+
+        HashMap<String, Object> body = new HashMap<>();
+        body.put("username", "asdf");
+        body.put("password", "maslo");
+
+        HashMap<String, Object> message = new HashMap<>();
+        message.put("header", header);
+        message.put("body", body);
+
+        try {
+            send(objectMapper.writeValueAsString(message));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
