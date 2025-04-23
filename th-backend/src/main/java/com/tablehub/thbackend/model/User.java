@@ -1,6 +1,7 @@
 package com.tablehub.thbackend.model;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users") // Table name in the database
