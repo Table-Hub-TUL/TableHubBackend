@@ -2,40 +2,34 @@ package com.tablehub.thbackend.model;
 
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
+import lombok.*;
+import org.locationtech.jts.geom.Point;
+import java.util.List;
 
 @Entity
-@Table(name = "restaurants")
+@Table(name = "restaurant")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Restaurant {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long restaurantId;
+    private Long id;
 
+    @Column(nullable = false)
     private String name;
 
-    public Restaurant() {
-    }
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Cuisine cuisine;
 
-    public Restaurant(Long restaurantId, String name) {
-        this.restaurantId = restaurantId;
-        this.name = name;
-    }
+    @ManyToOne
+    @JoinColumn(name = "address_id")
+    private Address address;
 
-    public Long getRestaurantId() {
-        return restaurantId;
-    }
+    @Column(columnDefinition = "geometry(Point,4326)", nullable = false)
+    private Point location;
 
-    public void setRestaurantId(Long restaurantId) {
-        this.restaurantId = restaurantId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    // TODO: Finish when DB is done
+    @OneToMany(mappedBy = "restaurant")
+    private List<RestaurantSection> sections;
 }

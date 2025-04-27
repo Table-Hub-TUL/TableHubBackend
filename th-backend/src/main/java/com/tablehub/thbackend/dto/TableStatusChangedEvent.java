@@ -1,16 +1,18 @@
 package com.tablehub.thbackend.dto;
 
+import com.tablehub.thbackend.model.TableStatus;
+
 public class TableStatusChangedEvent {
     private Long restaurantId;
     private Long sectionId;
     private Long tableId;
-    private TableStatusEnum newStatus;
+    private TableStatus newStatus;
     private Long changeTimestamp;
 
     public TableStatusChangedEvent() {
     }
 
-    public TableStatusChangedEvent(Long restaurantId, Long sectionId, Long tableId, TableStatusEnum newStatus, Long changeTimestamp) {
+    public TableStatusChangedEvent(Long restaurantId, Long sectionId, Long tableId, TableStatus newStatus, Long changeTimestamp) {
         this.restaurantId = restaurantId;
         this.sectionId = sectionId;
         this.tableId = tableId;
@@ -42,11 +44,11 @@ public class TableStatusChangedEvent {
         this.tableId = tableId;
     }
 
-    public TableStatusEnum getNewStatus() {
+    public TableStatus getNewStatus() {
         return newStatus;
     }
 
-    public void setNewStatus(TableStatusEnum newStatus) {
+    public void setNewStatus(TableStatus newStatus) {
         this.newStatus = newStatus;
     }
 
