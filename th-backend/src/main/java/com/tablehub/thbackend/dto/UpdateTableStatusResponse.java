@@ -1,18 +1,20 @@
 package com.tablehub.thbackend.dto;
 
+import com.tablehub.thbackend.model.TableStatus;
+
 public class UpdateTableStatusResponse {
     private Long restaurantId;
     private Long sectionId;
     private Long tableId;
     private boolean updateSuccess;
-    private TableStatusEnum resultingStatus;
+    private TableStatus resultingStatus;
     private String message;
     private Integer pointsAwarded;
 
     public UpdateTableStatusResponse() {
     }
 
-    public UpdateTableStatusResponse(Long restaurantId, Long sectionId, Long tableId, boolean updateSuccess, TableStatusEnum resultingStatus, String message, Integer pointsAwarded) {
+    public UpdateTableStatusResponse(Long restaurantId, Long sectionId, Long tableId, boolean updateSuccess, TableStatus resultingStatus, String message, Integer pointsAwarded) {
         this.restaurantId = restaurantId;
         this.sectionId = sectionId;
         this.tableId = tableId;
@@ -54,11 +56,11 @@ public class UpdateTableStatusResponse {
         this.updateSuccess = updateSuccess;
     }
 
-    public TableStatusEnum getResultingStatus() {
+    public TableStatus getResultingStatus() {
         return resultingStatus;
     }
 
-    public void setResultingStatus(TableStatusEnum resultingStatus) {
+    public void setResultingStatus(TableStatus resultingStatus) {
         this.resultingStatus = resultingStatus;
     }
 

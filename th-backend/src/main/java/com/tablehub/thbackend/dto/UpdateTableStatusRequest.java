@@ -1,15 +1,17 @@
 package com.tablehub.thbackend.dto;
 
+import com.tablehub.thbackend.model.TableStatus;
+
 public class UpdateTableStatusRequest {
     private Long restaurantId;
     private Long sectionId;
     private Long tableId;
-    private TableStatusEnum requestedStatus;
+    private TableStatus requestedStatus;
 
     public UpdateTableStatusRequest() {
     }
 
-    public UpdateTableStatusRequest(Long restaurantId, Long sectionId, Long tableId, TableStatusEnum requestedStatus) {
+    public UpdateTableStatusRequest(Long restaurantId, Long sectionId, Long tableId, TableStatus requestedStatus) {
         this.restaurantId = restaurantId;
         this.sectionId = sectionId;
         this.tableId = tableId;
@@ -40,11 +42,11 @@ public class UpdateTableStatusRequest {
         this.tableId = tableId;
     }
 
-    public TableStatusEnum getRequestedStatus() {
+    public TableStatus getRequestedStatus() {
         return requestedStatus;
     }
 
-    public void setRequestedStatus(TableStatusEnum requestedStatus) {
+    public void setRequestedStatus(TableStatus requestedStatus) {
         this.requestedStatus = requestedStatus;
     }
 }
