@@ -1,0 +1,11 @@
+services:
+  th-backend:
+    image: th-backend
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
