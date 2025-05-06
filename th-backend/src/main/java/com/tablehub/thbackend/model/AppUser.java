@@ -1,6 +1,8 @@
 package com.tablehub.thbackend.model;
 
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
@@ -18,6 +20,14 @@ public class AppUser {
 
     @Column(name = "auth_ref", nullable = false)
     private String authRef;
+
+    @NotBlank
+    @Size(min = 3, max = 100)
+    private String userName;
+
+    @NotBlank
+    @Size(min = 3, max = 100)
+    private String password;
 
     @Column(unique = true, nullable = false)
     private String email;
