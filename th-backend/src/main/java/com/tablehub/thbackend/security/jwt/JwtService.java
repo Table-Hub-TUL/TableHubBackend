@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -48,4 +49,32 @@ public class JwtService {
         });
         return builder.sign(algorithm);
     }
+
+    public boolean validateToken(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            JWT.require(algorithm).build().verify(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public String extractUsername(String token) {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        return JWT.require(algorithm)
+                .build()
+                .verify(token)
+                .getSubject();
+    }
+
+    public List<String> extractRoles(String token) {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        return JWT.require(algorithm)
+                .build()
+                .verify(token)
+                .getClaim("roles")
+                .asList(String.class);
+    }
+
 }

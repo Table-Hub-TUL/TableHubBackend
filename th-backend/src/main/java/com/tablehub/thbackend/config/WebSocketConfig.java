@@ -1,5 +1,6 @@
 package com.tablehub.thbackend.config;
 
+import com.tablehub.thbackend.security.auth.JwtHandshakeInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
@@ -17,9 +18,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     
     @Autowired
     private final AuthChannelInterceptor authChannelInterceptor;
+    private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
 
-    public WebSocketConfig(AuthChannelInterceptor authChannelInterceptor) {
+
+    public WebSocketConfig(AuthChannelInterceptor authChannelInterceptor, JwtHandshakeInterceptor jwtHandshakeInterceptor) {
         this.authChannelInterceptor = authChannelInterceptor;
+        this.jwtHandshakeInterceptor = jwtHandshakeInterceptor;
     }
 
     @Override
@@ -31,7 +35,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(@NonNull StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").setAllowedOrigins("*").withSockJS();
+        registry.addEndpoint("/ws").addInterceptors(jwtHandshakeInterceptor).setAllowedOrigins("*").withSockJS();
     }
 
     @Override
