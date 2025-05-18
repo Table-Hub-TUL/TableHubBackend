@@ -3,14 +3,19 @@ package com.tablehub.thbackend.security.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.tablehub.thbackend.security.auth.UserPrinciple;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+import io.jsonwebtoken.*;
 
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,20 +39,16 @@ public class JwtService {
                 .sign(algorithm);
     }
 
-    public String generateToken(String username, Map<String, Object> claims) {
-        Algorithm algorithm = Algorithm.HMAC256(secret);
-        JWTCreator.Builder builder = JWT.create()
-                .withSubject(username)
-                .withIssuedAt(new Date())
-                .withExpiresAt(Date.from(Instant.now().plusMillis(expirationTime)));
-        claims.forEach((key, value) -> {
-            if (value instanceof Boolean) {
-                builder.withClaim(key, (Boolean) value);
-            } else if (value instanceof Integer) {
-                builder.withClaim(key, (Integer) value);
-            }
-        });
-        return builder.sign(algorithm);
+    public String generateJwtToken(Authentication authentication) {
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+
+        return Jwts.builder()
+                .setSubject(userPrinciple.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + expirationTime*1000))
+                .claim("roles", userPrinciple.getAuthorities().stream().map(Objects::toString).collect(Collectors.toList()))
+                .signWith(SignatureAlgorithm.HS512, secret)
+                .compact();
     }
 
     public boolean validateToken(String token) {
@@ -60,7 +61,7 @@ public class JwtService {
         }
     }
 
-    public String extractUsername(String token) {
+    public String getUserNameFromJwtToken(String token) {
         Algorithm algorithm = Algorithm.HMAC256(secret);
         return JWT.require(algorithm)
                 .build()

@@ -6,7 +6,9 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "\"user\"")
@@ -33,6 +35,9 @@ public class AppUser {
     private String email;
 
     private String name;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Role> roles = new HashSet<>();
 
     @Column(name = "registered_at", nullable = false)
     private OffsetDateTime registeredAt;

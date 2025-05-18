@@ -14,12 +14,12 @@ import java.util.Map;
 
 @Component
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {
-    @Autowired
-    private JwtService jwtService;
-//
-//    public JwtHandshakeInterceptor() {
-//        this.jwtService = new JwtService();
-//    }
+
+    private final JwtService jwtService;
+
+    public JwtHandshakeInterceptor(JwtService jwtService) {
+        this.jwtService = jwtService;
+    }
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
@@ -27,7 +27,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         if (request instanceof ServletServerHttpRequest servletRequest) {
             String token = servletRequest.getServletRequest().getParameter("token"); // or header
             if (token != null && jwtService.validateToken(token)) {
-                String username = jwtService.extractUsername(token);
+                String username = jwtService.getUserNameFromJwtToken(token);
                 attributes.put("username", username);
                 return true;
             }

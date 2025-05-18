@@ -15,8 +15,7 @@ import com.tablehub.thbackend.websocket.AuthChannelInterceptor;
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-    
-    @Autowired
+
     private final AuthChannelInterceptor authChannelInterceptor;
     private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
 
