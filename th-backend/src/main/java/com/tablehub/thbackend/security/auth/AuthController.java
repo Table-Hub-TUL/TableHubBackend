@@ -2,6 +2,11 @@ package com.tablehub.thbackend.security.auth;
 
 import com.tablehub.thbackend.dto.auth.JwtResponse;
 import com.tablehub.thbackend.dto.auth.LoginForm;
+import com.tablehub.thbackend.dto.auth.ResponseMessage;
+import com.tablehub.thbackend.dto.auth.SignUpForm;
+import com.tablehub.thbackend.model.AppUser;
+import com.tablehub.thbackend.model.Role;
+import com.tablehub.thbackend.model.RoleName;
 import com.tablehub.thbackend.repo.RoleRepo;
 import com.tablehub.thbackend.repo.UserRepo;
 import com.tablehub.thbackend.security.jwt.JwtService;
@@ -56,21 +61,29 @@ public class AuthController {
         return ResponseEntity.ok(new JwtResponse(jwt,userDetails.getUsername(), userDetails.getAuthorities()));
     }
 
-//    @PostMapping("/signup")
-//    public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpForm signUpRequest) {
-//
-//        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-//            return new ResponseEntity<>(new ResponseMessage("Fail -> Username is already taken."), HttpStatus.BAD_REQUEST);
-//        }
-//
-//        // Create user account
-//        User user = new User(signUpRequest.getUsername(), passwordEncoder.encode(signUpRequest.getPassword()));
-//        Set<Role> roles = getRoles(signUpRequest);
-//
-//        user.setRoles(roles);
-//        userRepository.save(user);
-//
-//        return new ResponseEntity<>(new ResponseMessage("User registered successfully."), HttpStatus.OK);
-//
-//    }
+    @PostMapping("/signup")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpForm signUpRequest) {
+
+        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+            return new ResponseEntity<>(new ResponseMessage("Fail -> Username is already taken."), HttpStatus.BAD_REQUEST);
+        }
+
+        // Create user account
+        AppUser user = new AppUser();
+        Role userRole = roleRepository.findByName(RoleName.ROLE_USER)
+                .orElseThrow(() -> new RuntimeException("Error: Role not found."));
+
+        Set<Role> roles = new HashSet<>();
+        roles.add(userRole);
+
+        user.setRoles(roles);
+        user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+        user.setEmail(signUpRequest.getEmail());
+        user.setName(signUpRequest.getNickname());
+        user.setUserName(signUpRequest.getUsername());
+        userRepository.save(user);
+
+        return new ResponseEntity<>(new ResponseMessage("User registered successfully."), HttpStatus.OK);
+
+    }
 }
