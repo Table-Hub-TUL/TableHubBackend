@@ -11,6 +11,7 @@ import com.tablehub.thbackend.repo.RoleRepo;
 import com.tablehub.thbackend.repo.UserRepo;
 import com.tablehub.thbackend.security.jwt.JwtService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final DaoAuthenticationProvider daoAuthenticationProvider;
@@ -38,16 +40,6 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtProvider;
 
-    @Autowired
-    public AuthController(DaoAuthenticationProvider daoAuthenticationProvider,
-                          UserRepo userRepository, RoleRepo roleRepository,
-                          PasswordEncoder passwordEncoder, JwtService jwtProvider) {
-        this.daoAuthenticationProvider = daoAuthenticationProvider;
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtProvider = jwtProvider;
-    }
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginRequest) {
