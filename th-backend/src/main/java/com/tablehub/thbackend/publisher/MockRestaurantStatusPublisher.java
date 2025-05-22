@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -35,6 +37,26 @@ public class MockRestaurantStatusPublisher {
         dto.setFreeTableCount(newFree);
         dto.setTimestamp(Instant.now());
 
-        template.convertAndSend("/topic/restaurant/status", dto);
+        Map<String, Object> header = Map.of(
+                "messageId", UUID.randomUUID().toString(),
+                "correlationId", null,
+                "sender", "server",
+                "type", "TABLE_STATUS_CHANGED_EVENT",
+                "accessToken", null,
+                "timestamp", Instant.now().toEpochMilli()
+        );
+
+        Map<String, Object> envelope = Map.of(
+                "header", header,
+                "body", Map.of(
+                        "restaurantId", dto.getRestaurantId(),
+                        "name",          dto.getName(),
+                        "freeTableCount", dto.getFreeTableCount(),
+                        "totalTableCount", dto.getTotalTableCount(),
+                        "timestamp",     dto.getTimestamp().toEpochMilli()
+                )
+        );
+
+        template.convertAndSend("/topic/restaurant/status", envelope);
     }
 }
