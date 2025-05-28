@@ -117,3 +117,6 @@ VALUES
     (1, 1, NOW() - interval '2 days', 1),
     (2, 1, NOW() - interval '1 days', 2),
     (3, 2, NOW(), 3);
+
+ALTER TABLE "user" ADD COLUMN user_name VARCHAR UNIQUE NOT NULL;
+ALTER TABLE "user" ADD COLUMN password VARCHAR NOT NULL;
