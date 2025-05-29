@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -66,12 +67,13 @@ public class AuthController {
 
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
-
         user.setRoles(roles);
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
         user.setEmail(signUpRequest.getEmail());
         user.setName(signUpRequest.getNickname());
         user.setUserName(signUpRequest.getUsername());
+       // user.setPoints(0);
+        user.setRegisteredAt(OffsetDateTime.now());
         userRepository.save(user);
 
         return new ResponseEntity<>(new ResponseMessage("User registered successfully."), HttpStatus.OK);
