@@ -3,11 +3,13 @@ package com.tablehub.thbackend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class RestaurantResponseDto {
     private Long id;
     private String name;
@@ -15,4 +17,5 @@ public class RestaurantResponseDto {
     private Location location;
     private List<String> cuisine;
     private Double rating;
+
 }
