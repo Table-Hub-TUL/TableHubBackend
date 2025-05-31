@@ -46,13 +46,15 @@ public class MockRestaurantStatusPublisher {
         );
 
         Map<String, Object> body = Map.of(
-                "restaurant", Map.of(
-                        "id", restaurant.getId(),
-                        "name", restaurant.getName(),
-                        "address", restaurant.getAddress(),
-                        "location", restaurant.getLocation(),
-                        "cuisine", restaurant.getCuisine(),
-                        "rating", restaurant.getRating()
+                "restaurants", List.of(
+                        Map.of(
+                                "id", restaurant.getId(),
+                                "name", restaurant.getName(),
+                                "address", restaurant.getAddress(),
+                                "location", restaurant.getLocation(),
+                                "cuisine", restaurant.getCuisine(),
+                                "rating", restaurant.getRating()
+                        )
                 )
         );
 
