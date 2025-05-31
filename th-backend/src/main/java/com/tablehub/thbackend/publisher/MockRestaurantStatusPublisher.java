@@ -25,7 +25,7 @@ public class MockRestaurantStatusPublisher {
     @Scheduled(fixedRate = 6000, initialDelay = 0)
     public void publishUpdate() {
         int run = counter.incrementAndGet();
-        if (run > 5) return;
+        if (run > 10) return;
 
         int idx = ThreadLocalRandom.current().nextInt(restaurants.size());
         RestaurantResponseDto restaurant = restaurants.get(idx);
@@ -35,13 +35,6 @@ public class MockRestaurantStatusPublisher {
                 ThreadLocalRandom.current().nextDouble(-0.2, 0.2)) * 10) / 10.0;
         newRating = Math.max(1.0, Math.min(5.0, newRating));
         restaurant.setRating(newRating);
-
-        RestaurantsResponse response = new RestaurantsResponse(
-                List.of(restaurant)
-        );
-
-        template.convertAndSend("/topic/restaurant/updates", response);
-
 
         Map<String, Object> header = Map.of(
                 "messageId", UUID.randomUUID().toString(),
