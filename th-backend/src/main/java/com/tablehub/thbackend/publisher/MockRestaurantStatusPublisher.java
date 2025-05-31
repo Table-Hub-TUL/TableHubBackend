@@ -22,11 +22,11 @@ public class MockRestaurantStatusPublisher {
     private final List<RestaurantResponseDto> restaurants;
     private final AtomicInteger counter = new AtomicInteger(0);
 
-    @Scheduled(fixedRate = 6000, initialDelay = 0)
+    @Scheduled(fixedRate = 6000, initialDelay = 30_000)
     public void publishUpdate() {
         int run = counter.incrementAndGet();
-        if (run > 10) return;
-
+        if (run > 1000) return;
+        System.out.println("Publishing restaurant status update: " + run);
         int idx = ThreadLocalRandom.current().nextInt(restaurants.size());
         RestaurantResponseDto restaurant = restaurants.get(idx);
 
@@ -38,10 +38,10 @@ public class MockRestaurantStatusPublisher {
 
         Map<String, Object> header = Map.of(
                 "messageId", UUID.randomUUID().toString(),
-                "correlationId", null,
+                "correlationId", "",
                 "sender", "server",
-                "type", "RESTAURANT_UPDATE_EVENT",
-                "accessToken", null,
+                "type", "QUERY_RESTAURANTS_RESPONSE",
+                "accessToken", "",
                 "timestamp", Instant.now().toEpochMilli()
         );
 
@@ -61,6 +61,6 @@ public class MockRestaurantStatusPublisher {
                 "body", body
         );
 
-        template.convertAndSend("/topic/restaurant/updates", envelope);
+        template.convertAndSend("/topic/restaurant/status", envelope);
     }
 }
