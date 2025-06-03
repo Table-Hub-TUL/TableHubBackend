@@ -1,14 +1,16 @@
 package com.tablehub.thbackend.service.interfaces;
 
-import com.tablehub.thbackend.dto.*;
+import com.tablehub.thbackend.dto.request.UpdateTableStatusRequest;
+import com.tablehub.thbackend.dto.response.RestaurantStatusResponse;
+import com.tablehub.thbackend.dto.response.UpdateTableStatusResponse;
 
 import java.util.List;
 
 public interface RestaurantService {
 
-    List<RestaurantStatusDto> getAllRestaurantStatuses();
+    List<RestaurantStatusResponse> getAllRestaurantStatuses();
 
-    RestaurantStatusDto getStatusFor(Long restaurantId);
+    RestaurantStatusResponse getStatusFor(Long restaurantId);
 
     UpdateTableStatusResponse updateTableStatus(UpdateTableStatusRequest request, String username);
 }

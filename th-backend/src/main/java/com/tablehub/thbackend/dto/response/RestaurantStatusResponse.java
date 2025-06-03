@@ -1,22 +1,22 @@
-package com.tablehub.thbackend.dto;
+package com.tablehub.thbackend.dto.response;
 
 
 import java.time.Instant;
 
-public class RestaurantStatusDto {
+public class RestaurantStatusResponse {
     private Long restaurantId;
     private String name;
     private int freeTableCount;
     private int totalTableCount;
     private Instant timestamp;
 
-    public RestaurantStatusDto() {}
+    public RestaurantStatusResponse() {}
 
-    public RestaurantStatusDto(Long restaurantId,
-                               String name,
-                               int freeTableCount,
-                               int totalTableCount,
-                               Instant timestamp) {
+    public RestaurantStatusResponse(Long restaurantId,
+                                    String name,
+                                    int freeTableCount,
+                                    int totalTableCount,
+                                    Instant timestamp) {
         this.restaurantId    = restaurantId;
         this.name            = name;
         this.freeTableCount  = freeTableCount;

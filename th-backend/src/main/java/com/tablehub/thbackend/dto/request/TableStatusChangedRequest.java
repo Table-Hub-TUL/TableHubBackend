@@ -1,18 +1,18 @@
-package com.tablehub.thbackend.dto;
+package com.tablehub.thbackend.dto.request;
 
 import com.tablehub.thbackend.model.TableStatus;
 
-public class TableStatusChangedEvent {
+public class TableStatusChangedRequest {
     private Long restaurantId;
     private Long sectionId;
     private Long tableId;
     private TableStatus newStatus;
     private Long changeTimestamp;
 
-    public TableStatusChangedEvent() {
+    public TableStatusChangedRequest() {
     }
 
-    public TableStatusChangedEvent(Long restaurantId, Long sectionId, Long tableId, TableStatus newStatus, Long changeTimestamp) {
+    public TableStatusChangedRequest(Long restaurantId, Long sectionId, Long tableId, TableStatus newStatus, Long changeTimestamp) {
         this.restaurantId = restaurantId;
         this.sectionId = sectionId;
         this.tableId = tableId;

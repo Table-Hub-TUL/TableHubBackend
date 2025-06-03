@@ -1,6 +1,6 @@
-package com.tablehub.thbackend.security;
+package com.tablehub.thbackend.config;
 
-import com.tablehub.thbackend.security.auth.UserDetailsServiceImpl;
+import com.tablehub.thbackend.service.implementations.UserDetailsServiceImpl;
 import com.tablehub.thbackend.security.jwt.JwtAuthEntryPoint;
 import com.tablehub.thbackend.security.jwt.JwtAuthTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;

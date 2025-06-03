@@ -21,7 +21,7 @@ public class Restaurant {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Cuisine cuisine;
+    private CuisineName cuisineName;
 
     @ManyToOne
     @JoinColumn(name = "address_id")

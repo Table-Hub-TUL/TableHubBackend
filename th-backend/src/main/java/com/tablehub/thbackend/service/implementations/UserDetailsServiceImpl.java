@@ -1,7 +1,8 @@
-package com.tablehub.thbackend.security.auth;
+package com.tablehub.thbackend.service.implementations;
 
 import com.tablehub.thbackend.model.AppUser;
-import com.tablehub.thbackend.repo.UserRepo;
+import com.tablehub.thbackend.repo.UserRepository;
+import com.tablehub.thbackend.security.auth.UserPrinciple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
-    private UserRepo userRepository;
+    private UserRepository userRepository;
 
     @Override
     @Transactional

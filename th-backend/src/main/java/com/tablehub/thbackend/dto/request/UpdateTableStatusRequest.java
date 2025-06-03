@@ -1,4 +1,4 @@
-package com.tablehub.thbackend.dto;
+package com.tablehub.thbackend.dto.request;
 
 import com.tablehub.thbackend.model.TableStatus;
 

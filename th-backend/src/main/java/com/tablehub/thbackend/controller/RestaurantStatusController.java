@@ -1,8 +1,8 @@
-package com.tablehub.thbackend.controllers;
+package com.tablehub.thbackend.controller;
 
-import com.tablehub.thbackend.dto.RestaurantStatusDto;
-import com.tablehub.thbackend.dto.UpdateTableStatusRequest;
-import com.tablehub.thbackend.dto.UpdateTableStatusResponse;
+import com.tablehub.thbackend.dto.response.RestaurantStatusResponse;
+import com.tablehub.thbackend.dto.request.UpdateTableStatusRequest;
+import com.tablehub.thbackend.dto.response.UpdateTableStatusResponse;
 import com.tablehub.thbackend.service.interfaces.RestaurantService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.annotation.SendToUser;
@@ -27,7 +27,7 @@ public class RestaurantStatusController {
      */
     @MessageMapping("/initialStatus")
     @SendToUser("/queue/initialStatus")
-    public List<RestaurantStatusDto> sendInitialStatus() {
+    public List<RestaurantStatusResponse> sendInitialStatus() {
         return restaurantService.getAllRestaurantStatuses();
     }
 

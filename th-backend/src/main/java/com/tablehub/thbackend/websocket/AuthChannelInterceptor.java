@@ -1,8 +1,6 @@
 package com.tablehub.thbackend.websocket;
 
-import java.util.List;
-
-import com.tablehub.thbackend.security.jwt.JwtService;
+import com.tablehub.thbackend.service.implementations.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;

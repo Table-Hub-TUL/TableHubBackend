@@ -1,6 +1,7 @@
 package com.tablehub.thbackend.security.jwt;
 
-import com.tablehub.thbackend.security.auth.UserDetailsServiceImpl;
+import com.tablehub.thbackend.service.implementations.UserDetailsServiceImpl;
+import com.tablehub.thbackend.service.implementations.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
