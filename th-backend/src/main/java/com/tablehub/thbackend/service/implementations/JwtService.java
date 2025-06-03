@@ -39,14 +39,15 @@ public class JwtService {
 
     public String generateJwtToken(Authentication authentication) {
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-
-        return Jwts.builder()
-                .setSubject(userPrinciple.getUsername())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + expirationTime*1000))
-                .claim("roles", userPrinciple.getAuthorities().stream().map(Objects::toString).collect(Collectors.toList()))
-                .signWith(SignatureAlgorithm.HS512, secret)
-                .compact();
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        return JWT.create()
+                .withSubject(userPrinciple.getUsername())
+                .withIssuedAt(new Date())
+                .withExpiresAt(Date.from(Instant.now().plusMillis(expirationTime)))
+                .withClaim("roles", userPrinciple.getAuthorities().stream()
+                        .map(Object::toString)
+                        .collect(Collectors.toList()))
+                .sign(algorithm);
     }
 
     public boolean validateToken(String token) {

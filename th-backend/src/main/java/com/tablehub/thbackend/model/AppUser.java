@@ -18,9 +18,10 @@ import java.util.Set;
 @Builder
 public class AppUser {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "auth_ref", nullable = false)
+    @Column(name = "auth_ref")
     private String authRef;
 
     @NotBlank
@@ -39,7 +40,7 @@ public class AppUser {
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles = new HashSet<>();
 
-    @Column(name = "registered_at", nullable = false)
+    @Column(name = "registered_at")
     private OffsetDateTime registeredAt;
 
     @Column(nullable = false)
