@@ -5,26 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="83ec237f-e9bd-4648-aca9-d21fa510dea2" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/config/MockRestaurantData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/dto/Location.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/dto/RestaurantResponseDto.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/dto/RestaurantsRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/dto/RestaurantsResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/model/Position.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/publisher/MockRestaurantStatusPublisher.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/th-backend/src/main/resources/application-local.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/th-backend/src/main/resources/data.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/th-backend/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/th-backend/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/ThBackendApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/ThBackendApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/config/WebSocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/config/WebSocketConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/controller/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/dto/response/RestaurantStatusResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/dto/response/RestaurantStatusResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/model/AppUser.java" beforeDir="false" afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/model/AppUser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/model/Role.java" beforeDir="false" afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/model/Role.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/service/implementations/JwtService.java" beforeDir="false" afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/service/implementations/JwtService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/websocket/AuthChannelInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/websocket/AuthChannelInterceptor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/th-backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/th-backend/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/config/MockRestaurantData.java" beforeDir="false" afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/config/MockRestaurantData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/dto/RestaurantResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/dto/response/RestaurantResponseDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/dto/RestaurantsRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/dto/request/RestaurantsRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/dto/RestaurantsResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/dto/response/RestaurantsResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/dto/response/RestaurantStatusResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/publisher/MockRestaurantStatusPublisher.java" beforeDir="false" afterPath="$PROJECT_DIR$/th-backend/src/main/java/com/tablehub/thbackend/publisher/MockRestaurantStatusPublisher.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,7 +64,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.ThBackendApplication.executor": "Run",
-    "git-widget-placeholder": "Merging Cleanup",
+    "git-widget-placeholder": "Cleanup",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -124,7 +110,7 @@
       <workItem from="1747566038613" duration="4891000" />
       <workItem from="1747571946044" duration="966000" />
       <workItem from="1747667101473" duration="2106000" />
-      <workItem from="1748941129766" duration="4640000" />
+      <workItem from="1748941129766" duration="4995000" />
     </task>
     <servers />
   </component>

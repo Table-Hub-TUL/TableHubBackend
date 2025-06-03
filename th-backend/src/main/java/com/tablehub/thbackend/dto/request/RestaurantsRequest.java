@@ -1,5 +1,6 @@
-package com.tablehub.thbackend.dto;
+package com.tablehub.thbackend.dto.request;
 
+import com.tablehub.thbackend.dto.Location;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

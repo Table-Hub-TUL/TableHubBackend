@@ -1,7 +1,7 @@
 package com.tablehub.thbackend.config;
 
 import com.tablehub.thbackend.dto.Location;
-import com.tablehub.thbackend.dto.RestaurantResponseDto;
+import com.tablehub.thbackend.dto.response.RestaurantResponseDto;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

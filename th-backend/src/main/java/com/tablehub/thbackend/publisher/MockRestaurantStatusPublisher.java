@@ -1,7 +1,6 @@
 package com.tablehub.thbackend.publisher;
 
-import com.tablehub.thbackend.dto.RestaurantResponseDto;
-import com.tablehub.thbackend.dto.RestaurantsResponse;
+import com.tablehub.thbackend.dto.response.RestaurantResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
