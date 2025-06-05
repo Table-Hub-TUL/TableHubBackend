@@ -1,4 +1,4 @@
-package com.tablehub.thbackend.dto;
+package com.tablehub.thbackend.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

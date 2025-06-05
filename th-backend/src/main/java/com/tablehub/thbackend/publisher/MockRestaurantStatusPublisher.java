@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/*
 @Component
 @RequiredArgsConstructor
 public class MockRestaurantStatusPublisher {
@@ -65,3 +66,4 @@ public class MockRestaurantStatusPublisher {
         template.convertAndSend("/topic/restaurant/status", envelope);
     }
 }
+*/
