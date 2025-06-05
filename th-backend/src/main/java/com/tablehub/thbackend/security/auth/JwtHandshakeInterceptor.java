@@ -1,8 +1,7 @@
 package com.tablehub.thbackend.security.auth;
 
 
-import com.tablehub.thbackend.security.jwt.JwtService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.tablehub.thbackend.service.implementations.JwtService;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;

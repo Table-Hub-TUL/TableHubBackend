@@ -1,4 +1,4 @@
-package com.tablehub.thbackend.dto;
+package com.tablehub.thbackend.dto.response;
 
 public class ErrorResponse {
     private String errorCode;
