@@ -1,9 +1,9 @@
 package com.tablehub.thbackend.service.implementations;
 
-import com.tablehub.thbackend.dto.response.RestaurantStatusResponse;
+import com.tablehub.thbackend.dto.response.RestaurantStatusDto;
 import com.tablehub.thbackend.dto.request.UpdateTableStatusRequest;
 import com.tablehub.thbackend.dto.response.UpdateTableStatusResponse;
-import com.tablehub.thbackend.dto.request.TableStatusChangedRequest;
+import com.tablehub.thbackend.dto.event.TableStatusChangedEvent;
 import com.tablehub.thbackend.model.Restaurant;
 import com.tablehub.thbackend.model.RestaurantTable;
 import com.tablehub.thbackend.model.TableStatus;
@@ -37,7 +37,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<RestaurantStatusResponse> getAllRestaurantStatuses() {
+    public List<RestaurantStatusDto> getAllRestaurantStatuses() {
         return restaurantRepo.findAll()
                 .stream()
                 .map(this::buildStatusDto)
@@ -46,7 +46,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     @Transactional(readOnly = true)
-    public RestaurantStatusResponse getStatusFor(Long restaurantId) {
+    public RestaurantStatusDto getStatusFor(Long restaurantId) {
         Restaurant restaurant = restaurantRepo.findById(restaurantId)
                 .orElseThrow(() -> new EntityNotFoundException("Restaurant not found: " + restaurantId));
         return buildStatusDto(restaurant);
@@ -81,7 +81,7 @@ public class RestaurantServiceImpl implements RestaurantService {
                 10
         );
 
-        TableStatusChangedRequest event = new TableStatusChangedRequest(
+        TableStatusChangedEvent event = new TableStatusChangedEvent(
                 request.getRestaurantId(),
                 request.getSectionId(),
                 request.getTableId(),
@@ -97,14 +97,14 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     // helper method
-    private RestaurantStatusResponse buildStatusDto(Restaurant restaurant) {
+    private RestaurantStatusDto buildStatusDto(Restaurant restaurant) {
         long total = tableRepo.countByRestaurantSectionRestaurantId(restaurant.getId());
         long free  = tableRepo.countByRestaurantSectionRestaurantIdAndStatus(
                 restaurant.getId(),
                 TableStatus.AVAILABLE
         );
 
-        return new RestaurantStatusResponse(
+        return new RestaurantStatusDto(
                 restaurant.getId(),
                 restaurant.getName(),
                 (int) free,

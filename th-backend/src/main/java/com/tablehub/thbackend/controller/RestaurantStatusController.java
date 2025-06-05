@@ -1,6 +1,6 @@
 package com.tablehub.thbackend.controller;
 
-import com.tablehub.thbackend.dto.response.RestaurantStatusResponse;
+import com.tablehub.thbackend.dto.response.RestaurantStatusDto;
 import com.tablehub.thbackend.dto.request.UpdateTableStatusRequest;
 import com.tablehub.thbackend.dto.response.UpdateTableStatusResponse;
 import com.tablehub.thbackend.service.interfaces.RestaurantService;
@@ -27,7 +27,7 @@ public class RestaurantStatusController {
      */
     @MessageMapping("/initialStatus")
     @SendToUser("/queue/initialStatus")
-    public List<RestaurantStatusResponse> sendInitialStatus() {
+    public List<RestaurantStatusDto> sendInitialStatus() {
         return restaurantService.getAllRestaurantStatuses();
     }
 
