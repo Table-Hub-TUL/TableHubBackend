@@ -10,8 +10,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class ThBackendApplication {
 
     public static void main(String[] args) {
-        Dotenv dotenv = Dotenv.configure()       // current working directory
-                .filename(".env")      // optional, it's default
+        Dotenv dotenv = Dotenv.configure()
+                .directory("th-backend")    // specify the directory containing .env
+                .filename(".env")
                 .load();
         System.setProperty("JWT_SECRET", dotenv.get("JWT_SECRET"));
         System.setProperty("JWT_TIME", dotenv.get("JWT_TIME"));
