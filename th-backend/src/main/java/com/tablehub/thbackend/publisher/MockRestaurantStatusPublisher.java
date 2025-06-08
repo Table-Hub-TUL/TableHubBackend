@@ -29,7 +29,6 @@ public class MockRestaurantStatusPublisher {
         int idx = ThreadLocalRandom.current().nextInt(restaurants.size());
         RestaurantResponseDto restaurant = restaurants.get(idx);
 
-        // rating change simulation
         double newRating = Math.round((restaurant.getRating() +
                 ThreadLocalRandom.current().nextDouble(-0.2, 0.2)) * 10) / 10.0;
         newRating = Math.max(1.0, Math.min(5.0, newRating));
