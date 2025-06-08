@@ -1,5 +1,6 @@
 package com.tablehub.thbackend.controller;
 
+import com.tablehub.thbackend.dto.request.TableUpdateRequest;
 import com.tablehub.thbackend.model.RestaurantTable;
 import com.tablehub.thbackend.repo.RestaurantTableRepository;
 import org.springframework.http.HttpStatus;
