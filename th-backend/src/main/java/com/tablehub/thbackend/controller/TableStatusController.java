@@ -1,5 +1,17 @@
 package com.tablehub.thbackend.controller;
 
+import com.tablehub.thbackend.model.RestaurantTable;
+import com.tablehub.thbackend.repo.RestaurantTableRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/table")
 public class TableStatusController {

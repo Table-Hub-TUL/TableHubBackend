@@ -1,7 +1,6 @@
 package com.tablehub.thbackend.controller;
 
-import com.tablehub.thbackend.dto.response.RestaurantResponseDto;
-import com.tablehub.thbackend.dto.response.RestaurantsResponse;
+import com.tablehub.thbackend.model.Restaurant;
 import com.tablehub.thbackend.service.interfaces.RestaurantDataService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,30 +17,15 @@ public class RestaurantController {
     private final RestaurantDataService restaurantDataService;
 
     @GetMapping
-    public ResponseEntity<RestaurantsResponse> getAllRestaurants() {
-        RestaurantsResponse response = restaurantDataService.getAllRestaurants();
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/list")
-    public ResponseEntity<List<RestaurantResponseDto>> getAllRestaurantsAsList() {
-        try {
-            List<RestaurantResponseDto> restaurants = restaurantDataService.getAllRestaurantsAsList();
-            return ResponseEntity.ok(restaurants);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<List<Restaurant>> getAllRestaurants() {
+        List<Restaurant> restaurants = restaurantDataService.getAllRestaurants();
+        return ResponseEntity.ok(restaurants);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RestaurantResponseDto> getRestaurantById(@PathVariable Long id) {
-        try {
-            RestaurantResponseDto restaurant = restaurantDataService.getRestaurantById(id);
-            return ResponseEntity.ok(restaurant);
-        } catch (jakarta.persistence.EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<Restaurant> getRestaurantById(@PathVariable Long id) {
+        return restaurantDataService.getRestaurantById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }
