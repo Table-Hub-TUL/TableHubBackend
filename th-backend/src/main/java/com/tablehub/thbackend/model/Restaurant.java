@@ -27,8 +27,11 @@ public class Restaurant {
     @JoinColumn(name = "address_id")
     private Address address;
 
-    @Column(columnDefinition = "geometry(Point,4326)", nullable = false)
+    @Column(columnDefinition = "geometry(Point,4326)", nullable = true)
     private Point location;
+
+    @Column(nullable = false)
+    private Double rating = 0.0;
 
     @OneToMany(mappedBy = "restaurant")
     private List<RestaurantSection> sections;

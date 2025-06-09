@@ -1,7 +1,7 @@
 package com.tablehub.thbackend.dto.response;
 
 
-import com.tablehub.thbackend.dto.Location;
+import com.tablehub.thbackend.model.Location;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
