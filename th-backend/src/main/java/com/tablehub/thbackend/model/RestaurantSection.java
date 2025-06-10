@@ -1,5 +1,7 @@
 package com.tablehub.thbackend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Table;
 import lombok.*;
 import jakarta.persistence.*;
@@ -21,8 +23,10 @@ public class RestaurantSection {
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)
+    @JsonBackReference("restaurant-sections")
     private Restaurant restaurant;
 
     @OneToMany(mappedBy = "restaurantSection")
+    @JsonManagedReference("section-tables")
     private List<RestaurantTable> tables;
 }

@@ -1,5 +1,6 @@
 package com.tablehub.thbackend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -38,5 +39,6 @@ public class Address {
     private String country;
 
     @OneToMany(mappedBy = "address")
+    @JsonIgnore
     private List<Restaurant> restaurants;
 }
