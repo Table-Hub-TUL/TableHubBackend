@@ -1,4 +1,4 @@
-CREATE EXTENSION postgis;
+CREATE EXTENSION IF NOT EXISTS postgis;
 INSERT INTO role (name) SELECT 'ROLE_ADMIN' WHERE NOT EXISTS (SELECT * FROM role WHERE role.name='ROLE_ADMIN');
 INSERT INTO role (name) SELECT 'ROLE_USER' WHERE NOT EXISTS (SELECT * FROM role WHERE role.name='ROLE_USER');
 
@@ -10,9 +10,9 @@ VALUES
 
 INSERT INTO restaurant (id, name, cuisine_name, address_id, location, rating)
 VALUES
-    (3, 'Pierogi Paradise', 'POLISH', 3, NULL, 4.7),
-    (4, 'Casa Italiana', 'ITALIAN', 4, NULL, 4.3),
-    (5, 'Taco Fiesta', 'MEXICAN', 5, NULL, 4.1);
+    (3, 'Pierogi Paradise', 'POLISH', 3, ST_SetSRID(ST_MakePoint(19.457, 51.772), 4326), 4.7),
+    (4, 'Casa Italiana', 'ITALIAN', 4, ST_SetSRID(ST_MakePoint(19.460, 51.768), 4326), 4.3),
+    (5, 'Taco Fiesta', 'MEXICAN', 5, ST_SetSRID(ST_MakePoint(19.455, 51.765), 4326), 4.1);
 
 INSERT INTO restaurant_section (id, name, restaurant_id)
 VALUES
@@ -35,19 +35,3 @@ VALUES
     (11, 8, 'AVAILABLE', 1.0, 1.0, 8),
     (12, 9, 'AVAILABLE', 1.0, 1.0, 4),
     (13, 10, 'AVAILABLE', 2.0, 2.0, 6);
-
-
--- Update 'Pierogi Paradise' (Polish) with a central location in Łódź
-UPDATE restaurant
-SET location = ST_SetSRID(ST_MakePoint(19.457, 51.772), 4326)
-WHERE id = 3;
-
--- Update 'Casa Italiana' (Italian) with a plausible nearby location
-UPDATE restaurant
-SET location = ST_SetSRID(ST_MakePoint(19.460, 51.768), 4326)
-WHERE id = 4;
-
--- Update 'Taco Fiesta' (Mexican) with another plausible location in the city
-UPDATE restaurant
-SET location = ST_SetSRID(ST_MakePoint(19.455, 51.765), 4326)
-WHERE id = 5;
