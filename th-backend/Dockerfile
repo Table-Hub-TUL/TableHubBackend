@@ -3,7 +3,10 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:resolve
 COPY src ./src
-RUN mvn clean package -DskipTests -DfinalName=th-backend
+COPY .mvn ./.mvn
+COPY mvnw .
+COPY mvnw.cmd .
+RUN mvn clean package -DskipTests
 
 FROM amazoncorretto:21.0.6-al2
 WORKDIR /app
