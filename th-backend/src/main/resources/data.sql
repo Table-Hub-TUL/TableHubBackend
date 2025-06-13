@@ -42,14 +42,14 @@ WHERE NOT EXISTS (SELECT 1 FROM restaurant_section WHERE id = s.id);
 -- Insert restaurant tables only if ID doesn't exist
 INSERT INTO restaurant_table (id, restaurant_section_id, status, position_x, position_y, capacity)
 SELECT * FROM (VALUES
-    (5, 4, 'AVAILABLE', 1.0, 1.0, 4),
-    (6, 4, 'OCCUPIED', 2.0, 1.0, 2),
-    (7, 5, 'AVAILABLE', 1.0, 2.0, 6),
-    (8, 6, 'AVAILABLE', 3.0, 3.0, 2),
-    (9, 7, 'AVAILABLE', 1.0, 1.0, 4),
-    (10, 7, 'OCCUPIED', 2.0, 2.0, 4),
-    (11, 8, 'AVAILABLE', 1.0, 1.0, 8),
-    (12, 9, 'AVAILABLE', 1.0, 1.0, 4),
-    (13, 10, 'AVAILABLE', 2.0, 2.0, 6)
+    (5, 4, 'AVAILABLE', 1.0, 10.0, 4),
+    (6, 4, 'OCCUPIED', 1.0, 20.0, 2),
+    (7, 5, 'AVAILABLE', 1.0, 20.0, 6),
+    (8, 6, 'AVAILABLE', 1.0, 30.0, 2),
+    (9, 7, 'AVAILABLE', 30.0, 1.0, 4),
+    (10, 7, 'OCCUPIED', 20.0, 10.0, 4),
+    (11, 8, 'AVAILABLE', 10.0, 10.0, 8),
+    (12, 9, 'AVAILABLE', 10.0, 20.0, 4),
+    (13, 10, 'AVAILABLE', 20.0, 30.0, 6)
 ) AS t(id, section_id, status, x, y, cap)
 WHERE NOT EXISTS (SELECT 1 FROM restaurant_table WHERE id = t.id);
