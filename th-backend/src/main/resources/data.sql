@@ -14,8 +14,8 @@ ON CONFLICT (name) DO NOTHING;
 INSERT INTO address (id, street_number, apartment_number, street, city, postal_code, country)
 VALUES
     (3, 15, NULL, 'ul. Piotrkowska', 'Łódź', '90-001', 'Polska'),
-    (4, 22, 5, 'ul. Floriańska', 'Kraków', '31-021', 'Polska'),
-    (5, 8, NULL, 'ul. Nowy Świat', 'Warszawa', '00-497', 'Polska')
+    (4, 22, 5, 'ul. Legionów', 'Łódź', '90-423', 'Polska'),
+    (5, 8, NULL, 'ul. Zgierska', 'Łódź', '91-347', 'Polska')
 ON CONFLICT (id) DO UPDATE SET
     street_number = EXCLUDED.street_number,
     apartment_number = EXCLUDED.apartment_number,
