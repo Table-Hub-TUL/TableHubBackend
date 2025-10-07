@@ -32,7 +32,4 @@ public class RestaurantDTO {
         this.rating = restaurant.getRating();
         this.sections = restaurant.getSections();
     }
-
-    public static class SectionDTO {
-    }
 }

@@ -22,11 +22,4 @@ public class RestaurantController {
         List<Restaurant> restaurants = restaurantDataService.getAllRestaurants();
         return ResponseEntity.ok(restaurants.stream().map(RestaurantDTO::new).toList());
     }
-
-//    @GetMapping("/{id}")
-//    public ResponseEntity<Restaurant> getRestaurantById(@PathVariable Long id) {
-//        return restaurantDataService.getRestaurantById(id)
-//                .map(ResponseEntity::ok)
-//                .orElse(ResponseEntity.notFound().build());
-//    }
 }
