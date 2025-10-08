@@ -1,8 +1,13 @@
 package com.tablehub.thbackend.dto.response;
 
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
 import java.time.Instant;
 
+@Data
+@AllArgsConstructor
 public class RestaurantStatusDto {
     private Long restaurantId;
     private String name;
@@ -10,52 +15,4 @@ public class RestaurantStatusDto {
     private int totalTableCount;
     private Instant timestamp;
 
-    public RestaurantStatusDto() {}
-
-    public RestaurantStatusDto(Long restaurantId,
-                               String name,
-                               int freeTableCount,
-                               int totalTableCount,
-                               Instant timestamp) {
-        this.restaurantId    = restaurantId;
-        this.name            = name;
-        this.freeTableCount  = freeTableCount;
-        this.totalTableCount = totalTableCount;
-        this.timestamp       = timestamp;
-    }
-
-    public Long getRestaurantId() {
-        return restaurantId;
-    }
-    public void setRestaurantId(Long restaurantId) {
-        this.restaurantId = restaurantId;
-    }
-
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getFreeTableCount() {
-        return freeTableCount;
-    }
-    public void setFreeTableCount(int freeTableCount) {
-        this.freeTableCount = freeTableCount;
-    }
-
-    public int getTotalTableCount() {
-        return totalTableCount;
-    }
-    public void setTotalTableCount(int totalTableCount) {
-        this.totalTableCount = totalTableCount;
-    }
-
-    public Instant getTimestamp() {
-        return timestamp;
-    }
-    public void setTimestamp(Instant timestamp) {
-        this.timestamp = timestamp;
-    }
 }
