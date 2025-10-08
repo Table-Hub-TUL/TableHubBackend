@@ -10,6 +10,11 @@ INSERT INTO role (name)
 VALUES ('ROLE_USER')
 ON CONFLICT (name) DO NOTHING;
 
+INSERT INTO role (name)
+VALUES ('ROLE_OWNER')
+ON CONFLICT (name) DO NOTHING;
+
+
 -- Insert or update addresses
 INSERT INTO address (id, street_number, apartment_number, street, city, postal_code, country)
 VALUES

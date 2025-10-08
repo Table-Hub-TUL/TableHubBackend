@@ -37,4 +37,9 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant")
     @JsonManagedReference("restaurant-sections")
     private List<RestaurantSection> sections;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id")
+    private AppUser owner;
+    
 }
