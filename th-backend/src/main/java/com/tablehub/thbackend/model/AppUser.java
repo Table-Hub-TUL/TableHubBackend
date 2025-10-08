@@ -52,4 +52,7 @@ public class AppUser {
 
     @OneToMany(mappedBy = "user")
     private List<PointsAction> pointsActions;
+
+    @OneToMany(mappedBy = "owner")
+    private List<Restaurant> restaurants;
 }
