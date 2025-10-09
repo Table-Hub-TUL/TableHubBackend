@@ -4,11 +4,11 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 -- Insert or do nothing if role exists
 INSERT INTO role (name)
 VALUES ('ROLE_ADMIN')
-ON CONFLICT (name) DO NOTHING;
+    ON CONFLICT (name) DO NOTHING;
 
 INSERT INTO role (name)
 VALUES ('ROLE_USER')
-ON CONFLICT (name) DO NOTHING;
+    ON CONFLICT (name) DO NOTHING;
 
 INSERT INTO role (name)
 VALUES ('ROLE_OWNER')
@@ -90,3 +90,11 @@ ON CONFLICT (id) DO UPDATE SET
     position_x = EXCLUDED.position_x,
     position_y = EXCLUDED.position_y,
     capacity = EXCLUDED.capacity;
+
+INSERT INTO users (id, user_name, password, email, registered_at, points, status)
+VALUES (999, 'admin', '$2a$12$Tuxry0MXlpH53itkfLGrcecUjXq1KdCSpixRssVnRsalOi.yGjhhK', 'admin@tablehub.com', NOW(), 0, 'ACTIVE')
+    ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO users_roles (roles_id, app_user_id)
+VALUES ((SELECT id FROM role WHERE name = 'ROLE_ADMIN'), 999)
+    ON CONFLICT (roles_id, app_user_id) DO NOTHING;
