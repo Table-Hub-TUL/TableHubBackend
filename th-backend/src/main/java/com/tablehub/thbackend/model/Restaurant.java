@@ -41,5 +41,8 @@ public class Restaurant {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private AppUser owner;
+
+    @Column
+    private Integer freeTables;
     
 }
