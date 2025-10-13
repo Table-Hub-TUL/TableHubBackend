@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
-public class UserPrinciple implements UserDetails{
+public class UserPrinciple implements UserDetails {
     private Long id;
     private String username;
 
@@ -36,7 +36,7 @@ public class UserPrinciple implements UserDetails{
 
     public static UserPrinciple build(AppUser user) {
         List<GrantedAuthority> authorities = user.getRoles().stream().map(role ->
-                new SimpleGrantedAuthority(role.getClass().getName())
+                new SimpleGrantedAuthority(role.getName().name())
         ).collect(Collectors.toList());
 
         return new UserPrinciple(
@@ -64,7 +64,7 @@ public class UserPrinciple implements UserDetails{
 
     @Override
     public boolean isAccountNonExpired() {
-        return true     ;
+        return true;
     }
 
     @Override
@@ -85,7 +85,7 @@ public class UserPrinciple implements UserDetails{
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o ==null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         UserPrinciple user = (UserPrinciple) o;
         return Objects.equals(id, user.id);
     }
