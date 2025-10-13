@@ -14,14 +14,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RestaurantDetailedResponse {
-    @Id
     private Long id;
     private String name;
     private List<CuisineName> cuisine;
     private Address address;
     private Location location;
     private Double rating = 0.0;
-    private List<RestaurantSection> sections;
+    private List<SectionDto> sections;
 
     public RestaurantDetailedResponse(Restaurant restaurant) {
         this.id = restaurant.getId();
@@ -32,6 +31,10 @@ public class RestaurantDetailedResponse {
             this.location = new Location(restaurant.getLocation().getY(), restaurant.getLocation().getX());
         }
         this.rating = restaurant.getRating();
-        this.sections = restaurant.getSections();
+        this.sections = restaurant.getSections() != null
+                ? restaurant.getSections().stream()
+                .map(section -> new SectionDto())
+                .toList()
+                : List.of();
     }
 }

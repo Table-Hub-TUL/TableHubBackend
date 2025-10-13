@@ -1,6 +1,5 @@
 package com.tablehub.thbackend.controller;
 
-import com.tablehub.thbackend.dto.RestaurantDTO;
 import com.tablehub.thbackend.dto.response.RestaurantDetailedResponse;
 import com.tablehub.thbackend.dto.response.RestaurantSimpleResponse;
 import com.tablehub.thbackend.model.Restaurant;
