@@ -62,7 +62,6 @@ public class RestaurantController {
             @PathVariable Long restaurantId) {
 
         Optional<Restaurant> restaurant = restaurantDataService.getRestaurantById(restaurantId);
-
         return restaurant.map(value -> ResponseEntity.ok(new RestaurantDetailedResponse(value))).orElseGet(() -> ResponseEntity.notFound().build());
 
     }

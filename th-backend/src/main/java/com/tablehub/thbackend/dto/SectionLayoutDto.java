@@ -1,5 +1,12 @@
 package com.tablehub.thbackend.dto;
 
+import lombok.*;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class SectionLayoutDto {
     public int viewportWidth;
     public int viewportHeight;

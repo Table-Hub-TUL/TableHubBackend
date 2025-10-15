@@ -19,10 +19,8 @@ public class RestaurantDetailedResponse {
 
     public RestaurantDetailedResponse(Restaurant restaurant) {
         this.id = restaurant.getId();
-        this.sections = restaurant.getSections() != null
-                ? restaurant.getSections().stream()
-                .map(section -> new SectionDto())
-                .toList()
-                : List.of();
+        this.sections = restaurant.getSections().stream()
+                .map(SectionDto::new)
+                .toList();
     }
 }

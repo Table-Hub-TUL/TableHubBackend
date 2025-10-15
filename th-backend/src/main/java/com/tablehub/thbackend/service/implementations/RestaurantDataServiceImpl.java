@@ -47,6 +47,7 @@ public class RestaurantDataServiceImpl implements RestaurantDataService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Restaurant> getRestaurantById(Long id) {
         Optional<Restaurant> restaurant = restaurantRepository.findByIdWithSections(id);
 
