@@ -1,4 +1,4 @@
-package com.tablehub.thbackend.dto;
+package com.tablehub.thbackend.dto.types;
 
 import com.tablehub.thbackend.model.RestaurantTable;
 import com.tablehub.thbackend.model.TableStatus;
@@ -11,7 +11,7 @@ import lombok.*;
 public class TableDto {
     public long id;
     public TableStatus status;
-    public PointDto position;
+    public PositionDto position;
     public int capacity;
 
     public TableDto(RestaurantTable restaurantTable) {

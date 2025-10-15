@@ -1,4 +1,4 @@
-package com.tablehub.thbackend.dto;
+package com.tablehub.thbackend.dto.types;
 
 import com.tablehub.thbackend.model.RestaurantSection;
 import com.tablehub.thbackend.model.SectionName;
@@ -27,14 +27,14 @@ public class SectionDto {
                 .toList()
                 : List.of();
 
-//        this.pois = (section.getPois() != null)
-//                ? section.getPois().stream()
-//                .map(PointOfInterestDto::new)
-//                .toList()
-//                : List.of();
-//
-//        this.layout = section.getLayout() != null
-//                ? new SectionLayoutDto(section.getLayout())
-//                : null;
+        this.pois = (section.getPois() != null)
+                ? section.getPois().stream()
+                .map(PointOfInterestDto::new)
+                .toList()
+                : List.of();
+
+        this.layout = (section.getLayout() != null)
+                ? new SectionLayoutDto(section.getLayout())
+                : null;
     }
 }

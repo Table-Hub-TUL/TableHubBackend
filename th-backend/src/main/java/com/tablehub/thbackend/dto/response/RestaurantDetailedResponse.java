@@ -1,9 +1,8 @@
 package com.tablehub.thbackend.dto.response;
 
 
-import com.tablehub.thbackend.dto.SectionDto;
+import com.tablehub.thbackend.dto.types.SectionDto;
 import com.tablehub.thbackend.model.*;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

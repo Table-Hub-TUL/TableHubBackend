@@ -1,7 +1,7 @@
 package com.tablehub.thbackend.service.implementations;
 
 import com.tablehub.thbackend.dto.RestaurantSubscriptionInitialState;
-import com.tablehub.thbackend.dto.SectionDto;
+import com.tablehub.thbackend.dto.types.SectionDto;
 import com.tablehub.thbackend.dto.request.UpdateTableStatusRequest;
 import com.tablehub.thbackend.dto.response.RestaurantStatusDto;
 import com.tablehub.thbackend.dto.response.RestaurantSubscriptionResponse;

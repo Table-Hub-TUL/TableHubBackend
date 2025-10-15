@@ -1,7 +1,7 @@
 package com.tablehub.thbackend.dto.request;
 
 
-import com.tablehub.thbackend.dto.SectionDto;
+import com.tablehub.thbackend.dto.types.SectionDto;
 import com.tablehub.thbackend.model.Location;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +12,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-// Optional
 // TODO: Delete later if not needed
 public class RestaurantDetailedRequest {
     private Long id;

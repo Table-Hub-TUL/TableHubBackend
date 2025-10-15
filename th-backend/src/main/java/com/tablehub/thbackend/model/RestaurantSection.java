@@ -31,4 +31,12 @@ public class RestaurantSection {
     @OneToMany(mappedBy = "restaurantSection")
     @JsonManagedReference("section-tables")
     private List<RestaurantTable> tables;
+
+    @ElementCollection
+    @CollectionTable(name = "section_poi", joinColumns = @JoinColumn(name = "section_id"))
+    private List<PointOfInterest> pois;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "layout_id")
+    private SectionLayout layout;
 }

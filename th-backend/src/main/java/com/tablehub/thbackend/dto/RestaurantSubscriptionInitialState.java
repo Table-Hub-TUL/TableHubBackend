@@ -1,5 +1,6 @@
 package com.tablehub.thbackend.dto;
 
+import com.tablehub.thbackend.dto.types.SectionDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
