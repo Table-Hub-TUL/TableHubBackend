@@ -27,14 +27,14 @@ public class SectionDto {
                 .toList()
                 : List.of();
 
-        this.pois = (section.getPois() != null)
-                ? section.getPois().stream()
-                .map(PointOfInterestDto::new)
-                .toList()
-                : List.of();
-
-        this.layout = section.getLayout() != null
-                ? new SectionLayoutDto(section.getLayout())
-                : null;
+//        this.pois = (section.getPois() != null)
+//                ? section.getPois().stream()
+//                .map(PointOfInterestDto::new)
+//                .toList()
+//                : List.of();
+//
+//        this.layout = section.getLayout() != null
+//                ? new SectionLayoutDto(section.getLayout())
+//                : null;
     }
 }
