@@ -15,22 +15,10 @@ import java.util.List;
 @NoArgsConstructor
 public class RestaurantDetailedResponse {
     private Long id;
-    private String name;
-    private List<CuisineName> cuisine;
-    private Address address;
-    private Location location;
-    private Double rating = 0.0;
     private List<SectionDto> sections;
 
     public RestaurantDetailedResponse(Restaurant restaurant) {
         this.id = restaurant.getId();
-        this.name = restaurant.getName();
-        this.cuisine = List.of(restaurant.getCuisineName());
-        this.address = restaurant.getAddress();
-        if (restaurant.getLocation() != null) {
-            this.location = new Location(restaurant.getLocation().getY(), restaurant.getLocation().getX());
-        }
-        this.rating = restaurant.getRating();
         this.sections = restaurant.getSections() != null
                 ? restaurant.getSections().stream()
                 .map(section -> new SectionDto())

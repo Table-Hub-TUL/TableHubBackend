@@ -46,4 +46,6 @@ public class OpenApiConfig {
         
             **Note:** WebSocket protocols are not covered by OpenAPI spec.\s
             See application source code or contact the development team for detailed STOMP mapping documentation.
-            """));}}
+        """));
+    }
+}

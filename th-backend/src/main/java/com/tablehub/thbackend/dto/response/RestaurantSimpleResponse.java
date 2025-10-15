@@ -19,7 +19,6 @@ public class RestaurantSimpleResponse {
     private Address address;
     private Location location;
     private Double rating = 0.0;
-    private Integer freeTables;
 
     public  RestaurantSimpleResponse(Restaurant restaurant) {
         this.id = restaurant.getId();
@@ -30,6 +29,5 @@ public class RestaurantSimpleResponse {
             this.location = new Location(restaurant.getLocation().getY(), restaurant.getLocation().getX());
         }
         this.rating = restaurant.getRating();
-        this.freeTables = restaurant.getFreeTables();
     }
 }

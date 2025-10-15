@@ -6,12 +6,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class SectionDto {
     private Long id;
     private SectionName name;
+    public List<TableDto> tables;
+    public List<PointOfInterestDto> pois;
+    public SectionLayoutDto layout;
 
     public SectionDto(RestaurantSection section) {
         this.id = section.getId();

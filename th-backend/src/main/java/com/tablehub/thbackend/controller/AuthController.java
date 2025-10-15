@@ -138,7 +138,7 @@ public class AuthController {
         user.setEmail(signUpRequest.getEmail());
         user.setName(signUpRequest.getNickname());
         user.setUserName(signUpRequest.getUsername());
-       // user.setPoints(0);
+        user.setPoints(0);
         user.setRegisteredAt(OffsetDateTime.now());
         userRepository.save(user);
 

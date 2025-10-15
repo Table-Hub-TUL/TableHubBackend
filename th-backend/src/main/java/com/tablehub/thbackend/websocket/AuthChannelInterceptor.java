@@ -28,24 +28,24 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
         StompHeaderAccessor accessor =
                 MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-//        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-//            String token = accessor.getFirstNativeHeader("Authorization");
-//
-//            if (token != null && token.startsWith("Bearer ")) {
-//                token = token.substring(7);
-//                if (jwtService.validateToken(token)) {
-//                    String username = jwtService.getUserNameFromJwtToken(token);
-//                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-//                    Authentication auth = new UsernamePasswordAuthenticationToken(
-//                            userDetails, null, userDetails.getAuthorities());
-//                    accessor.setUser(auth); // Principal for WebSocket session
-//                } else {
-//                    throw new IllegalArgumentException("Invalid JWT token");
-//                }
-//            } else {
-//                throw new IllegalArgumentException("Missing Authorization header");
-//            }
-//        }
+        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+            String token = accessor.getFirstNativeHeader("Authorization");
+
+            if (token != null && token.startsWith("Bearer ")) {
+                token = token.substring(7);
+                if (jwtService.validateToken(token)) {
+                    String username = jwtService.getUserNameFromJwtToken(token);
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    Authentication auth = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    accessor.setUser(auth); // Principal for WebSocket session
+                } else {
+                    throw new IllegalArgumentException("Invalid JWT token");
+                }
+            } else {
+                throw new IllegalArgumentException("Missing Authorization header");
+            }
+        }
         return message;
     }
 }

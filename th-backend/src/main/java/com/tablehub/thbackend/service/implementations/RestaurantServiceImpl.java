@@ -66,12 +66,13 @@ public class RestaurantServiceImpl implements RestaurantService {
                 true, table.getStatus(), "Table status updated successfully.", 0);
     }
 
+    //TODO: Correct SectionDTO!!!!
     @Transactional(readOnly = true)
     public void sendInitialSubscriptionState(String username) {
         List<Restaurant> restaurants = restaurantRepository.findAllWithSections();
         for (Restaurant restaurant : restaurants) {
             List<SectionDto> sectionDtos = restaurant.getSections().stream()
-                    .map(section -> new SectionDto(section.getId(), section.getName().name()))
+                    .map(section -> new SectionDto(section.getId(), section.getName(), null, null, null))
                     .collect(Collectors.toList());
 
             RestaurantSubscriptionInitialState initialState = new RestaurantSubscriptionInitialState(restaurant.getId(), sectionDtos);
