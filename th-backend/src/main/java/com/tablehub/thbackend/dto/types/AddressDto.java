@@ -8,10 +8,10 @@ import lombok.*;
 @Getter
 @Setter
 public class AddressDto {
-    public int streetNumber;
-    public String streetName;
-    public Integer apartmentNumber; // nullable
-    public String city;
-    public String postalCode;
-    public String country;
+    private int streetNumber;
+    private String streetName;
+    private Integer apartmentNumber; // nullable
+    private String city;
+    private String postalCode;
+    private String country;
 }

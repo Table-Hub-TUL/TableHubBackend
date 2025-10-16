@@ -13,9 +13,9 @@ import java.util.List;
 public class SectionDto {
     private Long id;
     private SectionName name;
-    public List<TableDto> tables;
-    public List<PointOfInterestDto> pois;
-    public SectionLayoutDto layout;
+    private List<TableDto> tables;
+    private List<PointOfInterestDto> pois;
+    private SectionLayoutDto layout;
 
     public SectionDto(RestaurantSection section) {
         this.id = section.getId();

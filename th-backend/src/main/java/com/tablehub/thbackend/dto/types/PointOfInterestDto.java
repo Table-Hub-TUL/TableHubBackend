@@ -7,13 +7,14 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PointOfInterestDto {
-    // public int id;
-    private String description; // free text
+    private double id;
+    private String description;
     private PositionDto topLeft;
     private PositionDto bottomRight;
 //    private List<Integer> otherSectionPoiLink;
 
     public PointOfInterestDto(PointOfInterest pointOfInterest) {
+        this.id = pointOfInterest.getId();
         this.description = pointOfInterest.getDescription();
 
         this.topLeft = (pointOfInterest.getTopLeft() != null)

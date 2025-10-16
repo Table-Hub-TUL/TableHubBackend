@@ -9,10 +9,10 @@ import lombok.*;
 @NoArgsConstructor
 @Getter @Setter
 public class TableDto {
-    public long id;
-    public TableStatus status;
-    public PositionDto position;
-    public int capacity;
+    private long id;
+    private TableStatus status;
+    private PositionDto position;
+    private int capacity;
 
     public TableDto(RestaurantTable restaurantTable) {
         this.id = restaurantTable.getId();

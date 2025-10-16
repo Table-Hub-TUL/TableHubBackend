@@ -8,8 +8,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PositionDto {
-    public double x;
-    public double y;
+    private double x;
+    private double y;
     public PositionDto(Position point) {
         this.x = point.getX();
         this.y = point.getY();

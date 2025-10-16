@@ -9,9 +9,9 @@ import lombok.*;
 @Getter
 @Setter
 public class SectionLayoutDto {
-    public int viewportWidth;
-    public int viewportHeight;
-    public String shape; // SVG path string, ref: https://www.w3schools.com/graphics/svg_path.asp
+    private int viewportWidth;
+    private int viewportHeight;
+    private String shape; // SVG path string, ref: https://www.w3schools.com/graphics/svg_path.asp
 
     public SectionLayoutDto(SectionLayout layout) {
         this.viewportWidth = layout.getViewportWidth();

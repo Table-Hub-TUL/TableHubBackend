@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 @Embeddable
 // TODO: missing List<Integer> otherSectionPoiLink; id; check if needed
 public class PointOfInterest {
+    private double id;
+
     private String description;
 
     @Embedded
