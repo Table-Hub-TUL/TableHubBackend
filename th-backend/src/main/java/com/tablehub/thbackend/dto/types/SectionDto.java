@@ -9,7 +9,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter @Setter
 public class SectionDto {
     private Long id;
     private SectionName name;

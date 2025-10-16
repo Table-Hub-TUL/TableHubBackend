@@ -7,7 +7,6 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter @Setter
 public class TableDto {
     private long id;
     private TableStatus status;
@@ -18,5 +17,6 @@ public class TableDto {
         this.id = restaurantTable.getId();
         this.status = restaurantTable.getStatus();
         this.capacity = restaurantTable.getCapacity();
+        this.position = new PositionDto(restaurantTable.getPosition());
     }
 }

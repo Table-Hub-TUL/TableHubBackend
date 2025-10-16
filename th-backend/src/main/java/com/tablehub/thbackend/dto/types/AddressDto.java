@@ -5,8 +5,6 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 public class AddressDto {
     private int streetNumber;
     private String streetName;

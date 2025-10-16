@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class RestaurantDetailedResponse {
     private Long id;
     private List<SectionDto> sections;

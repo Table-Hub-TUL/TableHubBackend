@@ -6,8 +6,6 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 public class SectionLayoutDto {
     private int viewportWidth;
     private int viewportHeight;

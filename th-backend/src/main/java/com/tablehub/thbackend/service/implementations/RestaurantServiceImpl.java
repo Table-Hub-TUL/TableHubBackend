@@ -66,7 +66,6 @@ public class RestaurantServiceImpl implements RestaurantService {
                 true, table.getStatus(), "Table status updated successfully.", 0);
     }
 
-    //TODO: Correct SectionDTO!!!!
     @Transactional(readOnly = true)
     public void sendInitialSubscriptionState(String username) {
         List<Restaurant> restaurants = restaurantRepository.findAllWithSections();
