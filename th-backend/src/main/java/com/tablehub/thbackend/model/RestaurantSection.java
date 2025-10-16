@@ -32,7 +32,7 @@ public class RestaurantSection {
     @JsonManagedReference("section-tables")
     private List<RestaurantTable> tables;
 
-    @ElementCollection
+    @ElementCollection(fetch =  FetchType.EAGER)
     @CollectionTable(name = "section_poi", joinColumns = @JoinColumn(name = "section_id"))
     private List<PointOfInterest> pois;
 
