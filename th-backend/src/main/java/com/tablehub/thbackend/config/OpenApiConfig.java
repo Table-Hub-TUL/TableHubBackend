@@ -21,7 +21,7 @@ public class OpenApiConfig {
         
         ## WebSocket Documentation
         
-        This application uses **STOMP over WebSocket** for real-time communication. 
+        This application uses **STOMP over WebSocket** for real-time communication.
         The WebSocket API is *not* covered by OpenAPI specification.
         
         ### Connection Details
@@ -46,4 +46,6 @@ public class OpenApiConfig {
         
             **Note:** WebSocket protocols are not covered by OpenAPI spec.\s
             See application source code or contact the development team for detailed STOMP mapping documentation.
-            """));}}
+        """));
+    }
+}

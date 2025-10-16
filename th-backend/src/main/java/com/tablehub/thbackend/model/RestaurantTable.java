@@ -25,11 +25,8 @@ public class RestaurantTable {
     @Column(nullable = false)
     private TableStatus status;
 
-    @Column(name = "position_x")
-    private Float positionX;
-
-    @Column(name = "position_y")
-    private Float positionY;
+    @Column(name = "pos")
+    private Position position;
 
     @Column(nullable = false)
     private Integer capacity;

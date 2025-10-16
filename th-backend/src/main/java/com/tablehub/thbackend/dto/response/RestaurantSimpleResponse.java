@@ -1,27 +1,27 @@
-package com.tablehub.thbackend.dto;
+package com.tablehub.thbackend.dto.response;
+
 
 import com.tablehub.thbackend.model.*;
-import jakarta.persistence.*;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
-
-@Data
+@Getter
 @AllArgsConstructor
-@RequiredArgsConstructor
-public class RestaurantDTO {
-    @Id
+@NoArgsConstructor
+public class RestaurantSimpleResponse {
     private Long id;
     private String name;
     private List<CuisineName> cuisine;
     private Address address;
     private Location location;
     private Double rating = 0.0;
-    private List<RestaurantSection> sections;
 
-    public RestaurantDTO(Restaurant restaurant) {
+    public  RestaurantSimpleResponse(Restaurant restaurant) {
         this.id = restaurant.getId();
         this.name = restaurant.getName();
         this.cuisine = List.of(restaurant.getCuisineName());
@@ -30,6 +30,5 @@ public class RestaurantDTO {
             this.location = new Location(restaurant.getLocation().getY(), restaurant.getLocation().getX());
         }
         this.rating = restaurant.getRating();
-        this.sections = restaurant.getSections();
     }
 }

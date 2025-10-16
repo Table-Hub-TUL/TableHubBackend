@@ -1,7 +1,7 @@
 package com.tablehub.thbackend.service.implementations;
 
 import com.tablehub.thbackend.dto.RestaurantSubscriptionInitialState;
-import com.tablehub.thbackend.dto.SectionDto;
+import com.tablehub.thbackend.dto.types.SectionDto;
 import com.tablehub.thbackend.dto.request.UpdateTableStatusRequest;
 import com.tablehub.thbackend.dto.response.RestaurantStatusDto;
 import com.tablehub.thbackend.dto.response.RestaurantSubscriptionResponse;
@@ -71,7 +71,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         List<Restaurant> restaurants = restaurantRepository.findAllWithSections();
         for (Restaurant restaurant : restaurants) {
             List<SectionDto> sectionDtos = restaurant.getSections().stream()
-                    .map(section -> new SectionDto(section.getId(), section.getName().name()))
+                    .map(section -> new SectionDto(section.getId(), section.getName(), null, null, null))
                     .collect(Collectors.toList());
 
             RestaurantSubscriptionInitialState initialState = new RestaurantSubscriptionInitialState(restaurant.getId(), sectionDtos);
