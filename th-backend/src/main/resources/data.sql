@@ -84,7 +84,7 @@ VALUES
     (27, 10, 'AVAILABLE', 1.0, 1.0, 6),
     (28, 10, 'AVAILABLE', 1.0, 10.0, 2),
     (29, 10, 'AVAILABLE', 1.0, 20.0, 4)
-ON CONFLICT (id) DO UPDATE SET
+    ON CONFLICT (id) DO UPDATE SET
     restaurant_section_id = EXCLUDED.restaurant_section_id,
     status = EXCLUDED.status,
     position_x = EXCLUDED.position_x,

@@ -25,7 +25,11 @@ public class RestaurantTable {
     @Column(nullable = false)
     private TableStatus status;
 
-    @Column(name = "pos")
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "x", column = @Column(name = "position_x")),
+            @AttributeOverride(name = "y", column = @Column(name = "position_y"))
+    })
     private Position position;
 
     @Column(nullable = false)
