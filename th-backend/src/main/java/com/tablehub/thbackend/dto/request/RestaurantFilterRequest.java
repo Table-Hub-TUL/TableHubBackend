@@ -2,6 +2,7 @@ package com.tablehub.thbackend.dto.request;
 
 
 import com.tablehub.thbackend.dto.types.SectionDto;
+import com.tablehub.thbackend.model.CuisineName;
 import com.tablehub.thbackend.model.Location;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,13 +13,11 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-// TODO: Delete later if not needed
-public class RestaurantDetailedRequest {
-    private Long id;
-    private String name;
-    private String address;
-    private Location location;
-    private List<String> cuisine;
+public class RestaurantFilterRequest {
+    private List<CuisineName> cuisine;
     private Double rating;
-    private List<SectionDto> sections;
+    private Double userLat;
+    private Double userLon;
+    private Double radius;
+    private int restaurantAmount; //Optional
 }

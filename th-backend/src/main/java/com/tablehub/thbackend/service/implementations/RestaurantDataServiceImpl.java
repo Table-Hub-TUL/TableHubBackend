@@ -1,10 +1,13 @@
 package com.tablehub.thbackend.service.implementations;
 
+import com.tablehub.thbackend.dto.request.RestaurantFilterRequest;
 import com.tablehub.thbackend.model.Restaurant;
 import com.tablehub.thbackend.model.RestaurantSection;
 import com.tablehub.thbackend.repo.RestaurantRepository;
+import com.tablehub.thbackend.repo.spec.RestaurantSpecification;
 import com.tablehub.thbackend.service.interfaces.RestaurantDataService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +47,13 @@ public class RestaurantDataServiceImpl implements RestaurantDataService {
         }
 
         return restaurants;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Restaurant> findRestaurantsByCriteria(RestaurantFilterRequest criteria) {
+        Specification<Restaurant> spec = RestaurantSpecification.byCriteria(criteria);
+        return restaurantRepository.findAll(spec);
     }
 
     @Override
