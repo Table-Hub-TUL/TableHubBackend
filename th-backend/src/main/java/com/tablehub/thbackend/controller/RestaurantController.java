@@ -1,10 +1,13 @@
 package com.tablehub.thbackend.controller;
 
+import com.tablehub.thbackend.dto.request.RestaurantFilterRequest;
 import com.tablehub.thbackend.dto.response.RestaurantDetailedResponse;
 import com.tablehub.thbackend.dto.response.RestaurantSimpleResponse;
+import com.tablehub.thbackend.model.CuisineName;
 import com.tablehub.thbackend.model.Restaurant;
 import com.tablehub.thbackend.service.interfaces.RestaurantDataService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -43,11 +46,43 @@ public class RestaurantController {
                     )
             )
     })
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<RestaurantSimpleResponse>> getAllRestaurants() {
         logger.info("Received request to get all restaurants.");
         List<Restaurant> restaurants = restaurantDataService.getAllRestaurants();
         logger.info("Found {} restaurants. Returning list.", restaurants.size());
+        return ResponseEntity.ok(restaurants.stream().map(RestaurantSimpleResponse::new).toList());
+    }
+
+    @Operation(
+            summary = "Get all restaurants",
+            description = "Retrieves a list of all restaurants in the system"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved list of restaurants",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = RestaurantSimpleResponse.class)
+                    )
+            )
+    })
+    @GetMapping()
+    public ResponseEntity<List<RestaurantSimpleResponse>> getFilteredRestaurants(
+            @Parameter(description = "Filter by cuisine type") @RequestParam(required = false) List<CuisineName> cuisine,
+            @Parameter(description = "Filter by minimum rating (e.g., 4.5)") @RequestParam(required = false) Double minRating,
+            @Parameter(description = "User's current latitude for distance search") @RequestParam(required = false) Double userLat,
+            @Parameter(description = "User's current longitude for distance search") @RequestParam(required = false) Double userLon,
+            @Parameter(description = "Search radius in kilometers") @RequestParam(required = false) Double radiusKm,
+            @Parameter(description = "The page number to retrieve (zero-based)") @RequestParam(defaultValue = "10") int amount
+    ) {
+        logger.info("Received request to filter restaurants (distance = {}).", radiusKm);
+        RestaurantFilterRequest criteria = new RestaurantFilterRequest(cuisine, minRating, userLat, userLon, radiusKm, amount);
+        List<Restaurant> restaurants = restaurantDataService.findRestaurantsByCriteria(criteria);
+
+        logger.info("Found {} restaurants matching criteria from requested {}", restaurants.size(), amount);
+
         return ResponseEntity.ok(restaurants.stream().map(RestaurantSimpleResponse::new).toList());
     }
 
