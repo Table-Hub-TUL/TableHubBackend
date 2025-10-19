@@ -19,11 +19,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -41,7 +44,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Tag(name = "Authentication", description = "Authentication management APIs")
 public class AuthController {
-
+    private final Logger log = LoggerFactory.getLogger(AuthController.class);
     private final DaoAuthenticationProvider daoAuthenticationProvider;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -74,17 +77,29 @@ public class AuthController {
     })
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid
-                                                  @RequestBody
-                                                  @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User login details", required = true, content = @Content(schema = @Schema(implementation = AuthLoginRequest.class)))
-                                                  AuthLoginRequest loginRequest) {
-        Authentication authentication = daoAuthenticationProvider.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+                                              @RequestBody
+                                              @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User login details", required = true, content = @Content(schema = @Schema(implementation = AuthLoginRequest.class)))
+                                              AuthLoginRequest loginRequest) {
+        log.info("Processing authentication request for user '{}'", loginRequest.getUsername());
 
-        String jwt = jwtProvider.generateJwtToken(authentication);
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        try {
+            Authentication authentication = daoAuthenticationProvider.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
-        return ResponseEntity.ok(new AuthJwtResponse(jwt,userDetails.getUsername(), userDetails.getAuthorities()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtProvider.generateJwtToken(authentication);
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+            log.info("User '{}' authenticated successfully. Issuing JWT.", userDetails.getUsername());
+
+            AuthJwtResponse responseBody = new AuthJwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities());
+            return ResponseEntity.ok(responseBody);
+
+        } catch (AuthenticationException e) {
+            log.warn("Authentication failed for user '{}': {}", loginRequest.getUsername(), e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error: Invalid credentials");
+        }
     }
 
 
@@ -114,35 +129,49 @@ public class AuthController {
     })
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid
-                                              @RequestBody
-                                              @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                                                      description = "User registration details",
-                                                      required = true,
-                                                      content = @Content(schema = @Schema(implementation = AuthSignUpRequest.class))
-                                              )
-                                              AuthSignUpRequest signUpRequest) {
+                                          @RequestBody
+                                          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                                                  description = "User registration details",
+                                                  required = true,
+                                                  content = @Content(schema = @Schema(implementation = AuthSignUpRequest.class))
+                                          )
+                                          AuthSignUpRequest signUpRequest) {
+        log.info("Processing registration request for username '{}' and email '{}'",
+                signUpRequest.getUsername(), signUpRequest.getEmail());
 
         if (userRepository.existsByUserName(signUpRequest.getUsername())) {
-            return new ResponseEntity<>(new AuthMessageResponse("Fail -> Username is already taken."), HttpStatus.BAD_REQUEST);
+            log.warn("Registration failed: Username '{}' is already taken.", signUpRequest.getUsername());
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new AuthMessageResponse("Error: Username is already taken."));
         }
 
-        // Create user account
-        AppUser user = new AppUser();
-        Role userRole = roleRepository.findByName(RoleName.ROLE_USER)
-                .orElseThrow(() -> new RuntimeException("Error: Role not found."));
+        try {
+            AppUser user = new AppUser();
+            Role userRole = roleRepository.findByName(RoleName.ROLE_USER)
+                    .orElseThrow(() -> new RuntimeException("CRITICAL: Default 'ROLE_USER' not found in the database."));
 
-        Set<Role> roles = new HashSet<>();
-        roles.add(userRole);
-        user.setRoles(roles);
-        user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-        user.setEmail(signUpRequest.getEmail());
-        user.setName(signUpRequest.getNickname());
-        user.setUserName(signUpRequest.getUsername());
-        user.setPoints(0);
-        user.setRegisteredAt(OffsetDateTime.now());
-        userRepository.save(user);
+            user.setUserName(signUpRequest.getUsername());
+            user.setEmail(signUpRequest.getEmail());
+            user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+            user.setName(signUpRequest.getNickname());
 
-        return new ResponseEntity<>(new AuthMessageResponse("User registered successfully."), HttpStatus.OK);
+            Set<Role> roles = new HashSet<>();
+            roles.add(userRole);
+            user.setRoles(roles);
+            user.setPoints(0);
+            user.setRegisteredAt(OffsetDateTime.now());
 
+            userRepository.save(user);
+            log.info("User '{}' registered successfully.", user.getUserName());
+            return ResponseEntity.ok(new AuthMessageResponse("User registered successfully."));
+        } catch (RuntimeException e) {
+            log.error("Failed to register user '{}' due to a server error.", signUpRequest.getUsername(), e);
+            log.error("FIX DB YOU STUPID NIGGER");
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new AuthMessageResponse("Error: Could not register user due to an internal error."));
+        }
     }
 }
+
