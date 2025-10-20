@@ -379,4 +379,9 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
             }
         }
     }
+
+    @ClientCallable
+    public void updateShapePath(String pathString) {
+        shapePathDisplay.setValue(pathString);
+    }
 }

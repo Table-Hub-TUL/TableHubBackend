@@ -3,8 +3,8 @@
     let isDrawing = false;
     let vaadinComponent = null;
 
-
     let previewLine = null;
+    let wallPath = null;
 
     /**
      * Toggles the drawing mode on or off.
@@ -16,12 +16,19 @@
 
         isDrawing = startDrawing;
         points = [];
+        let svg = getOrCreateDrawingSvg(canvas);
 
         if (isDrawing) {
             canvas.style.cursor = 'crosshair';
             canvas.addEventListener('click', handleCanvasClick);
             canvas.addEventListener('mousemove', handleMouseMove);
-            let svg = getOrCreateDrawingSvg(canvas);
+
+            wallPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            wallPath.setAttribute('fill', 'none');
+            wallPath.setAttribute('stroke', '#888'); // Style to match the saved wall
+            wallPath.setAttribute('stroke-width', '3');
+            svg.appendChild(wallPath);
+
             previewLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             previewLine.setAttribute('stroke', '#007bff');
             previewLine.setAttribute('stroke-dasharray', '5, 5');
@@ -32,15 +39,24 @@
             canvas.style.cursor = 'default';
             canvas.removeEventListener('click', handleCanvasClick);
             canvas.removeEventListener('mousemove', handleMouseMove);
+
             if (previewLine) {
                 previewLine.remove();
                 previewLine = null;
+            }
+            if (wallPath) {
+                wallPath.remove();
+                wallPath = null;
             }
         }
     };
 
     function handleCanvasClick(event) {
         if (!isDrawing || !vaadinComponent) return;
+
+        if (event.target.classList.contains('draggable-item')) {
+            return;
+        }
 
         const canvas = event.currentTarget;
         const rect = canvas.getBoundingClientRect();
@@ -50,6 +66,11 @@
         points.push({ x, y });
 
         const pathString = generatePathString();
+
+        if (wallPath) {
+            wallPath.setAttribute('d', pathString);
+        }
+
         vaadinComponent.$server.updateShapePath(pathString);
     }
 
@@ -78,7 +99,7 @@
     function getOrCreateDrawingSvg(canvas) {
         let svg = canvas.querySelector("#drawing-svg");
         if (!svg) {
-            let svgHtml = `<svg id='drawing-svg' width='100%' height='100%' style='position:absolute; top:0; left:0; z-index: 1;'></svg>`;
+            let svgHtml = `<svg id='drawing-svg' width='100%' height='100%' style='position:absolute; top:0; left:0; z-index: 5;'></svg>`;
             canvas.insertAdjacentHTML('beforeend', svgHtml);
             svg = canvas.querySelector("#drawing-svg");
         }

@@ -47,7 +47,7 @@ public class SecurityConfig {
 
     /**
      * Runs FIRST (Order 1): Secures your STATELESS API.
-     * This filter chain now ONLY matches /api/** routes.
+     * This filter chain only matches /api/** routes.
      */
     @Bean
     @Order(1)
@@ -70,8 +70,7 @@ public class SecurityConfig {
     }
 
     /**
-     * Runs SECOND (Order 2): Secures your STATEFUL Vaadin UI.
-     * This filter chain now matches EVERYTHING ELSE (/**).
+     * Runs SECOND (Order 2): Secures STATEFUL Vaadin UI.
      */
     @Bean
     @Order(2)

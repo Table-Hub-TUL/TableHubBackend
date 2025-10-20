@@ -35,9 +35,35 @@ import interact from 'interactjs';
                      */
                     end(event) {
                         const target = event.target;
+                        const canvas = document.getElementById('canvas');
 
-                        const finalX = (parseFloat(target.style.left) || 0) + (parseFloat(target.getAttribute('data-x')) || 0);
-                        const finalY = (parseFloat(target.style.top) || 0) + (parseFloat(target.getAttribute('data-y')) || 0);
+                        if (!canvas) {
+                            console.error("Canvas element not found!");
+                            return;
+                        }
+
+                        const canvasRect = canvas.getBoundingClientRect();
+                        const itemRect = target.getBoundingClientRect();
+
+                        let finalX = (parseFloat(target.style.left) || 0) + (parseFloat(target.getAttribute('data-x')) || 0);
+                        let finalY = (parseFloat(target.style.top) || 0) + (parseFloat(target.getAttribute('data-y')) || 0);
+
+                        const itemWidth = itemRect.width;
+                        const itemHeight = itemRect.height;
+
+                        if (finalX < 0) {
+                            finalX = 0;
+                        }
+                        if (finalX + itemWidth > canvas.clientWidth) {
+                            finalX = canvas.clientWidth - itemWidth;
+                        }
+
+                        if (finalY < 0) {
+                            finalY = 0;
+                        }
+                        if (finalY + itemHeight > canvas.clientHeight) {
+                            finalY = canvas.clientHeight - itemHeight;
+                        }
 
                         const itemId = target.getAttribute('data-item-id');
                         const itemType = target.getAttribute('data-item-type');
