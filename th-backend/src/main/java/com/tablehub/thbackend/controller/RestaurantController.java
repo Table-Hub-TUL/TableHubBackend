@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,23 +71,15 @@ public class RestaurantController {
     })
     @GetMapping()
     public ResponseEntity<List<RestaurantSimpleResponse>> getFilteredRestaurants(
-            @Parameter(description = "Filter by cuisine type") @RequestParam(required = false) List<CuisineName> cuisine,
-            @Parameter(description = "Filter by minimum rating (e.g., 4.5)") @RequestParam(required = false) Double minRating,
-            @Parameter(description = "User's current latitude for distance search") @RequestParam(required = false) Double userLat,
-            @Parameter(description = "User's current longitude for distance search") @RequestParam(required = false) Double userLon,
-            @Parameter(description = "Search radius in kilometers") @RequestParam(required = false) Double radiusKm,
-            @Parameter(description = "The page number to retrieve (zero-based)") @RequestParam(defaultValue = "10") int amount
+            @ParameterObject RestaurantFilterRequest criteria
     ) {
-        logger.info("Received request to filter restaurants (distance = {}).", radiusKm);
-        RestaurantFilterRequest criteria = new RestaurantFilterRequest(cuisine, minRating, userLat, userLon, radiusKm, amount);
+        logger.info("Received request to filter restaurants (distance = {}).", criteria.getRadius());
         List<Restaurant> restaurants = restaurantDataService.findRestaurantsByCriteria(criteria);
 
-        logger.info("Found {} restaurants matching criteria from requested {}", restaurants.size(), amount);
-
+        logger.info("Found {} restaurants matching criteria", restaurants.size());
         return ResponseEntity.ok(restaurants.stream().map(RestaurantSimpleResponse::new).toList());
     }
 
-    // TODO: use RestaurantDetailedRequest if needed
     @Operation(
             summary = "Get detailed information about a restaurant by ID",
             description = "Fetches a detailed representation of a restaurant using its unique identifier."
