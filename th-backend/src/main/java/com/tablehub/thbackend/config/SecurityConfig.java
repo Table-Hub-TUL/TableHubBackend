@@ -27,7 +27,6 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtAuthEntryPoint unauthorizedHandler;
 
-    // --- Your beans are all correct ---
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -54,19 +53,18 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher(new AntPathRequestMatcher("/api/**")) // <-- SPECIFIC match
+                .securityMatcher(new AntPathRequestMatcher("/api/**"))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().authenticated() // All API requests must be authenticated
+                        .anyRequest().authenticated()
                 )
                 .exceptionHandling(unauthorized -> unauthorized
                         .authenticationEntryPoint(unauthorizedHandler)
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // STATELESS
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
 
-        // Add your JWT filter
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
@@ -79,10 +77,9 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain vaadinUiFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/**") // <-- CATCH-ALL
+                .securityMatcher("/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Permit all the public Vaadin routes you listed
                         .requestMatchers(
                                 "/",
                                 "/?v-r=init&**",
@@ -97,8 +94,6 @@ public class SecurityConfig {
                                 "/images/**",
                                 "/styles/**"
                         ).permitAll()
-
-                        // Permit your other public routes
                         .requestMatchers(
                                 "/h2-console/**",
                                 "/swagger-ui/**",
@@ -106,11 +101,7 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/login"
                         ).permitAll()
-
-                        // Secure your admin UI
                         .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_OWNER")
-
-                        // Block any other unauthenticated requests
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -118,11 +109,9 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/admin/restaurants", true)
                 )
                 .sessionManagement(session -> session
-                        // STATEFUL: Vaadin needs this
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
                 .headers(headers -> headers
-                        // Fix for H2 console
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
                 );
 

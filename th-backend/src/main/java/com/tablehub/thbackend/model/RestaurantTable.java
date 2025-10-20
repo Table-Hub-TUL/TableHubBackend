@@ -14,6 +14,7 @@ import jakarta.persistence.*;
 @Builder
 public class RestaurantTable {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

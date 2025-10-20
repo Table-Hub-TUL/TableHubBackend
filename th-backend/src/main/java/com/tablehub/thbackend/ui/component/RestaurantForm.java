@@ -20,6 +20,8 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.shared.Registration;
 import org.locationtech.jts.geom.Point;
 
+import java.util.Objects;
+
 public class RestaurantForm extends FormLayout {
 
     private final GeocodingService geocodingService;
@@ -48,11 +50,27 @@ public class RestaurantForm extends FormLayout {
         this.addressRepo = addressRepo;
 
         cuisineName.setItems(CuisineName.values());
-        add(name, cuisineName, streetNumber, street, city, postalCode, country, createButtonLayout());
 
-        restaurantBinder.bindInstanceFields(this);
+        name.setRequired(true);
+        cuisineName.setRequired(true);
+        street.setRequired(true);
+        streetNumber.setRequired(true);
+        city.setRequired(true);
+        postalCode.setRequired(true);
+        country.setRequired(true);
+
+        add(name, cuisineName, street, streetNumber, city, postalCode, country, createButtonLayout());
+
+        restaurantBinder.forField(name)
+                .withValidator(s -> s != null && !s.trim().isEmpty(), "Restaurant name is required.")
+                .bind(Restaurant::getName, Restaurant::setName);
+
+        restaurantBinder.forField(cuisineName)
+                .withValidator(Objects::nonNull, "Cuisine is required.")
+                .bind(Restaurant::getCuisineName, Restaurant::setCuisineName);
 
         addressBinder.forField(streetNumber)
+                .withValidator(val -> val != null && val > 0, "Street number is required and must be positive.")
                 .withConverter(
                         Double::intValue,
                         Integer::doubleValue
@@ -60,20 +78,31 @@ public class RestaurantForm extends FormLayout {
                 .bind(Address::getStreetNumber, Address::setStreetNumber);
 
         addressBinder.forField(street)
+                .withValidator(s -> s != null && !s.trim().isEmpty(), "Street name is required.")
                 .bind(Address::getStreet, Address::setStreet);
 
         addressBinder.forField(city)
+                .withValidator(s -> s != null && !s.trim().isEmpty(), "City is required.")
                 .bind(Address::getCity, Address::setCity);
 
         addressBinder.forField(postalCode)
+                .withValidator(s -> s != null && !s.trim().isEmpty(), "Postal code is required.")
                 .bind(Address::getPostalCode, Address::setPostalCode);
 
         addressBinder.forField(country)
+                .withValidator(s -> s != null && !s.trim().isEmpty(), "Country is required.")
                 .bind(Address::getCountry, Address::setCountry);
 
         setRestaurant(null);
 
-        save.addClickListener(e -> saveRestaurant());
+        save.addClickListener(e -> {
+            if (restaurantBinder.validate().hasErrors() || addressBinder.validate().hasErrors()) {
+                Notification.show("Please fix validation errors.", 3000, Notification.Position.MIDDLE);
+                return;
+            }
+            saveRestaurant();
+        });
+
         cancel.addClickListener(e -> setRestaurant(null));
     }
 

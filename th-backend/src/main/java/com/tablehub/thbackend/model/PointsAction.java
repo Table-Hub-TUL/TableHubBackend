@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 @Builder
 public class PointsAction {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
