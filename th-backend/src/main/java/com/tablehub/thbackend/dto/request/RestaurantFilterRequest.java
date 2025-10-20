@@ -7,6 +7,7 @@ import com.tablehub.thbackend.model.Location;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -39,5 +40,5 @@ public class RestaurantFilterRequest {
 
     @Parameter(description = "Maximum number of restaurants to return")
     @Schema(description = "Maximum number of results", example = "10", minimum = "1")
-    private int restaurantAmount; // Optional
+    private int restaurantAmount = 10; // Optional
 }
