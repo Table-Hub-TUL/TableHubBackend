@@ -12,6 +12,7 @@ import interact from 'interactjs';
             .draggable({
                 inertia: false,
                 autoScroll: true,
+                ignoreFrom: '.ignore-drag',
 
                 listeners: {
                     /**
@@ -35,6 +36,11 @@ import interact from 'interactjs';
                      */
                     end(event) {
                         const target = event.target;
+
+                        if (!event.dx && !event.dy) {
+                            return;
+                        }
+
                         const canvas = document.getElementById('canvas');
 
                         if (!canvas) {
