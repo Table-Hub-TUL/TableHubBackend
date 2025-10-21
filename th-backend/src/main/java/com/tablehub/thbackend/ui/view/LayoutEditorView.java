@@ -53,6 +53,7 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
     private TextField poiNameField = new TextField("POI Name");
     private Button addPoiButton = new Button("Add POI");
     private Button toggleWallDrawButton = new Button("Draw Walls");
+    private Button clearWallsButton = new Button("Clear Walls");
     private TextField shapePathDisplay = new TextField("SVG Path");
     private Button saveLayoutButton = new Button("Save Shape");
 
@@ -133,15 +134,9 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
         shapePathDisplay.setWidth("400px");
         shapePathDisplay.setReadOnly(true);
 
-        HorizontalLayout sectionControls = new HorizontalLayout(sectionSelector, addSectionButton);
+        VerticalLayout sectionControls = new VerticalLayout(sectionSelector, addSectionButton);
         sectionControls.setAlignItems(Alignment.END);
-        VerticalLayout tableControls = new VerticalLayout(capacityField, addTableButton);
-        VerticalLayout poiControls = new VerticalLayout(poiNameField, addPoiButton);
-        VerticalLayout wallControls = new VerticalLayout(toggleWallDrawButton, shapePathDisplay, saveLayoutButton);
-        wallControls.setSpacing(false);
-
-        HorizontalLayout controls = new HorizontalLayout(sectionControls, tableControls, poiControls, wallControls);
-        controls.setAlignItems(Alignment.START);
+        HorizontalLayout controls = getHorizontalLayout(sectionControls);
         add(controls, canvas);
 
         sectionSelector.addValueChangeListener(e -> loadLayout(e.getValue()));
@@ -150,6 +145,18 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
         addPoiButton.addClickListener(e -> addPoi());
         toggleWallDrawButton.addClickListener(e -> toggleWallDrawing());
         saveLayoutButton.addClickListener(e -> saveLayoutShape());
+        clearWallsButton.addClickListener(e -> clearWalls());
+    }
+
+    private HorizontalLayout getHorizontalLayout(VerticalLayout sectionControls) {
+        VerticalLayout tableControls = new VerticalLayout(capacityField, addTableButton);
+        VerticalLayout poiControls = new VerticalLayout(poiNameField, addPoiButton);
+        VerticalLayout wallControls = new VerticalLayout(toggleWallDrawButton, clearWallsButton, shapePathDisplay, saveLayoutButton);
+        wallControls.setSpacing(false);
+
+        HorizontalLayout controls = new HorizontalLayout(sectionControls, tableControls, poiControls, wallControls);
+        controls.setAlignItems(Alignment.START);
+        return controls;
     }
 
     @Override
@@ -159,6 +166,18 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
             this.currentRestaurant = restaurant;
             refreshSectionSelector();
         });
+    }
+
+    private void clearWalls() {
+        if (isDrawingWalls) {
+            toggleWallDrawing();
+        }
+        shapePathDisplay.setValue("");
+
+        UI.getCurrent().getPage().executeJs(
+                "var renderedWall = document.getElementById('rendered-wall-svg');" +
+                        "if (renderedWall) { renderedWall.remove(); }"
+        );
     }
 
     private void refreshSectionSelector() {
@@ -251,6 +270,7 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
             shapePathDisplay.setValue(svgPath);
 
             Div svg = new Div();
+            svg.setId("rendered-wall-svg");
 
             String svgString = String.format(
                     "<svg width='100%%' height='100%%' style='position:absolute; top:0; left:0; z-index: 0;'>" +
