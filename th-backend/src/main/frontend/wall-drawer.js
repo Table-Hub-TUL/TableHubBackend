@@ -15,10 +15,15 @@
         const canvas = vaadinComponent.querySelector("#canvas");
 
         isDrawing = startDrawing;
-        points = [];
         let svg = getOrCreateDrawingSvg(canvas);
 
         if (isDrawing) {
+            points = [];
+
+            if (wallPath) {
+                wallPath.remove();
+            }
+
             canvas.style.cursor = 'crosshair';
             canvas.addEventListener('click', handleCanvasClick);
             canvas.addEventListener('mousemove', handleMouseMove);
@@ -43,10 +48,6 @@
             if (previewLine) {
                 previewLine.remove();
                 previewLine = null;
-            }
-            if (wallPath) {
-                wallPath.remove();
-                wallPath = null;
             }
         }
     };

@@ -176,7 +176,9 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
 
         UI.getCurrent().getPage().executeJs(
                 "var renderedWall = document.getElementById('rendered-wall-svg');" +
-                        "if (renderedWall) { renderedWall.remove(); }"
+                        "if (renderedWall) { renderedWall.remove(); }" +
+                        "var drawingSvg = document.getElementById('drawing-svg');" +
+                        "if (drawingSvg) { drawingSvg.remove(); }"
         );
     }
 
