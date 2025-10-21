@@ -12,6 +12,7 @@ import interact from 'interactjs';
             .draggable({
                 inertia: false,
                 autoScroll: true,
+                ignoreFrom: 'vaadin-button',
 
                 listeners: {
                     /**
@@ -19,6 +20,10 @@ import interact from 'interactjs';
                      */
                     move(event) {
                         const target = event.target;
+
+                        // if (event.interaction.downEvent.target.closest('vaadin-button')) {
+                        //     return;
+                        // }
 
                         const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
                         const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
@@ -75,7 +80,7 @@ import interact from 'interactjs';
                         target.style.top = finalY + 'px';
 
                         if (itemType === 'table') {
-                            const coordSpan = target.querySelector('span:last-child');
+                            const coordSpan = target.querySelectorAll('span')[1];
                             if(coordSpan) {
                                 coordSpan.textContent = `X:${Math.round(finalX)}, Y:${Math.round(finalY)}`;
                             }

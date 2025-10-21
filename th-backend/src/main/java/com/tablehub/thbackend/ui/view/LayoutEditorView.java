@@ -9,11 +9,14 @@ import com.tablehub.thbackend.ui.layout.MainLayout;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -57,7 +60,7 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
     private TextField shapePathDisplay = new TextField("SVG Path");
     private Button saveLayoutButton = new Button("Save Shape");
 
-    private static class DraggableTable extends Div {
+    private class DraggableTable extends Div {
         public RestaurantTable table;
         private Span coordSpan;
 
@@ -71,7 +74,20 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
             capacitySpan.getStyle().set("font-weight", "bold").set("font-size", "1.2em");
             coordSpan.getStyle().set("font-size", "0.7em").set("display", "block");
 
-            add(capacitySpan, coordSpan);
+            Button deleteButton = new Button(VaadinIcon.TRASH.create());
+            deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
+            deleteButton.getStyle()
+                    .set("position", "absolute")
+                    .set("top", "-5px")
+                    .set("right", "-5px")
+                    .set("width", "24px")
+                    .set("height", "24px")
+                    .set("padding", "0")
+                    .set("min-width", "0")
+                    .set("z-index", "15");
+            deleteButton.addClickListener(e -> confirmAndDeleteTable());
+
+            add(capacitySpan, coordSpan, deleteButton);
 
             setClassName("draggable-item");
             getElement().setAttribute("data-item-id", table.getId().toString());
@@ -87,18 +103,54 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
                     .set("align-items", "center").set("justify-content", "center")
                     .set("border-radius", "4px");
         }
+
         public void updateCoordsText() {
             String coords = String.format("X:%.0f, Y:%.0f", table.getPosition().getX(), table.getPosition().getY());
             coordSpan.setText(coords);
         }
+
+        private void confirmAndDeleteTable() {
+            showDeleteConfirmation("table", this::deleteTable);
+        }
+
+        private void deleteTable() {
+            try {
+                tableRepo.delete(table);
+                canvas.remove(this);
+
+                if (currentSection != null) {
+                    currentSection = sectionRepo.findByIdWithTables(currentSection.getId()).orElse(null);
+                }
+
+                Notification.show("Table deleted.");
+
+            } catch (Exception e) {
+                Notification.show("Error deleting table: " + e.getMessage(), 3000, Notification.Position.MIDDLE);
+            }
+        }
     }
 
-    private static class DraggablePoi extends Div {
+    private class DraggablePoi extends Div {
         public PointOfInterest poi;
 
         public DraggablePoi(PointOfInterest poi) {
             this.poi = poi;
             setText(poi.getDescription());
+
+            Button deleteButton = new Button(VaadinIcon.TRASH.create());
+            deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
+            deleteButton.getStyle()
+                    .set("position", "absolute")
+                    .set("top", "-5px")
+                    .set("right", "-5px")
+                    .set("width", "24px")
+                    .set("height", "24px")
+                    .set("padding", "0")
+                    .set("min-width", "0")
+                    .set("z-index", "15");
+            deleteButton.addClickListener(e -> confirmAndDeletePoi());
+
+            add(deleteButton);
 
             addClassName("draggable-item");
             getElement().setAttribute("data-item-id", String.valueOf(poi.getId()));
@@ -116,6 +168,23 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
                     .set("top", y + "px")
                     .set("cursor", "move")
                     .set("z-index", "10");
+        }
+
+        private void confirmAndDeletePoi() {
+            showDeleteConfirmation("POI", this::deletePoi);
+        }
+
+        private void deletePoi() {
+            if (currentSection != null) {
+                try {
+                    currentSection.getPois().remove(poi);
+                    sectionRepo.save(currentSection);
+                    canvas.remove(this);
+                    Notification.show("POI deleted.");
+                } catch (Exception e) {
+                    Notification.show("Error deleting POI: " + e.getMessage(), 3000, Notification.Position.MIDDLE);
+                }
+            }
         }
     }
 
@@ -368,6 +437,23 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
         UI.getCurrent().getPage().executeJs("window.initDraggables($0)", getElement());
 
         poiNameField.clear();
+    }
+
+    private void showDeleteConfirmation(String itemType, Runnable deleteAction) {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("Confirm Delete");
+        dialog.add(new Paragraph("Are you sure you want to delete this " + itemType + "?"));
+
+        Button deleteButton = new Button("Delete", e -> {
+            deleteAction.run();
+            dialog.close();
+        });
+        deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
+        Button cancelButton = new Button("Cancel", e -> dialog.close());
+
+        dialog.getFooter().add(cancelButton, deleteButton);
+        dialog.open();
     }
 
     @ClientCallable
