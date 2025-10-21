@@ -9,13 +9,11 @@ import com.tablehub.thbackend.ui.layout.MainLayout;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -29,7 +27,6 @@ import jakarta.annotation.security.RolesAllowed;
 
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 @Route(value = "admin/layout", layout = MainLayout.class)
 @PageTitle("Layout Editor | TableHub CMS")
@@ -64,7 +61,7 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
         public RestaurantTable table;
         private Span coordSpan;
 
-        public DraggableTable(RestaurantTable table, Consumer<DraggableTable> deleteCallback) {
+        public DraggableTable(RestaurantTable table) {
             this.table = table;
 
             Span capacitySpan = new Span(String.valueOf(table.getCapacity()));
@@ -74,18 +71,7 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
             capacitySpan.getStyle().set("font-weight", "bold").set("font-size", "1.2em");
             coordSpan.getStyle().set("font-size", "0.7em").set("display", "block");
 
-            Button deleteButton = new Button(VaadinIcon.TRASH.create());
-            deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
-            deleteButton.addClassName("ignore-drag"); // Class for JS to ignore drag
-            deleteButton.getStyle()
-                    .set("position", "absolute")
-                    .set("top", "-8px")
-                    .set("right", "-8px")
-                    .set("cursor", "pointer")
-                    .set("z-index", "11");
-            deleteButton.addClickListener(e -> deleteCallback.accept(this));
-
-            add(capacitySpan, coordSpan, deleteButton);
+            add(capacitySpan, coordSpan);
 
             setClassName("draggable-item");
             getElement().setAttribute("data-item-id", table.getId().toString());
@@ -110,22 +96,9 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
     private static class DraggablePoi extends Div {
         public PointOfInterest poi;
 
-        public DraggablePoi(PointOfInterest poi, Consumer<DraggablePoi> deleteCallback) {
+        public DraggablePoi(PointOfInterest poi) {
             this.poi = poi;
             setText(poi.getDescription());
-
-            Button deleteButton = new Button(VaadinIcon.TRASH.create());
-            deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
-            deleteButton.addClassName("ignore-drag");
-            deleteButton.getStyle()
-                    .set("position", "absolute")
-                    .set("top", "-8px")
-                    .set("right", "-8px")
-                    .set("cursor", "pointer")
-                    .set("z-index", "11");
-            deleteButton.addClickListener(e -> deleteCallback.accept(this));
-
-            add(deleteButton);
 
             addClassName("draggable-item");
             getElement().setAttribute("data-item-id", String.valueOf(poi.getId()));
@@ -271,13 +244,13 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
 
             if (fullSection.getTables() != null) {
                 for (RestaurantTable table : fullSection.getTables()) {
-                    canvas.add(new DraggableTable(table, this::deleteTable));
+                    canvas.add(new DraggableTable(table));
                 }
             }
 
             if (fullSection.getPois() != null) {
                 for (PointOfInterest poi : fullSection.getPois()) {
-                    canvas.add(new DraggablePoi(poi, this::deletePoi));
+                    canvas.add(new DraggablePoi(poi));
                 }
             }
 
@@ -356,16 +329,10 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
                 .build();
 
         RestaurantTable savedTable = tableRepo.save(newTable);
-        DraggableTable tableComponent = new DraggableTable(savedTable, this::deleteTable);
+        DraggableTable tableComponent = new DraggableTable(savedTable);
         canvas.add(tableComponent);
         UI.getCurrent().getPage().executeJs("window.initDraggables($0)", getElement());
         capacityField.clear();
-    }
-
-    private void deleteTable(DraggableTable tableComponent) {
-        tableRepo.delete(tableComponent.table);
-        canvas.remove(tableComponent);
-        Notification.show("Table deleted.");
     }
 
     private void toggleWallDrawing() {
@@ -394,26 +361,11 @@ public class LayoutEditorView extends VerticalLayout implements HasUrlParameter<
         currentSection.getPois().add(newPoi);
         sectionRepo.save(currentSection);
 
-        DraggablePoi poiComponent = new DraggablePoi(newPoi, this::deletePoi);
+        DraggablePoi poiComponent = new DraggablePoi(newPoi);
         canvas.add(poiComponent);
         UI.getCurrent().getPage().executeJs("window.initDraggables($0)", getElement());
 
         poiNameField.clear();
-    }
-
-    private void deletePoi(DraggablePoi poiComponent) {
-        if (currentSection == null) return;
-
-        // POIs are in an @ElementCollection, so we remove from the list and save the parent section
-        boolean removed = currentSection.getPois().removeIf(poi ->
-                poi.getId() == poiComponent.poi.getId()
-        );
-
-        if (removed) {
-            sectionRepo.save(currentSection);
-            canvas.remove(poiComponent);
-            Notification.show("POI deleted.");
-        }
     }
 
     @ClientCallable
