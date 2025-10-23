@@ -167,7 +167,6 @@ public class AuthController {
             return ResponseEntity.ok(new AuthMessageResponse("User registered successfully."));
         } catch (RuntimeException e) {
             log.error("Failed to register user '{}' due to a server error.", signUpRequest.getUsername(), e);
-            log.error("FIX DB YOU STUPID NIGGER");
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new AuthMessageResponse("Error: Could not register user due to an internal error."));
