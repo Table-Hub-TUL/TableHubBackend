@@ -1,7 +1,8 @@
 package com.tablehub.thbackend.config;
 
 import com.tablehub.thbackend.security.auth.JwtHandshakeInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -17,6 +18,7 @@ import com.tablehub.thbackend.websocket.AuthChannelInterceptor;
 @EnableWebSocketMessageBroker
 @EnableScheduling
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+    private static final Logger logger = LoggerFactory.getLogger(WebSocketConfig.class);
 
     private final AuthChannelInterceptor authChannelInterceptor;
     private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
@@ -29,6 +31,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(@NonNull MessageBrokerRegistry registry) {
+        logger.info("Configuring message broker with prefixes: /topic, /queue. Application prefix: /app");
         registry.enableSimpleBroker("/topic", "/queue");
         registry.setUserDestinationPrefix("/user");
         registry.setApplicationDestinationPrefixes("/app");
@@ -36,11 +39,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(@NonNull StompEndpointRegistry registry) {
+        logger.info("Registering STOMP endpoint: /ws");
         registry.addEndpoint("/ws").addInterceptors(jwtHandshakeInterceptor).setAllowedOrigins("*");
     }
 
     @Override
     public void configureClientInboundChannel(@NonNull ChannelRegistration registration) {
+        logger.info("Configuring client inbound channel with authentication interceptor.");
         registration.interceptors(authChannelInterceptor);
     }
 }

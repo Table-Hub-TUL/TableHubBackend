@@ -15,6 +15,7 @@ import java.util.List;
 @Builder
 public class Restaurant {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)

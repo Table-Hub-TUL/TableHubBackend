@@ -17,6 +17,6 @@ public class TableDto {
         this.id = restaurantTable.getId();
         this.status = restaurantTable.getStatus();
         this.capacity = restaurantTable.getCapacity();
-        this.position = new PositionDto(restaurantTable.getPosition());
+        this.position = restaurantTable.getPosition() != null ? new PositionDto(restaurantTable.getPosition()) : null;
     }
 }
