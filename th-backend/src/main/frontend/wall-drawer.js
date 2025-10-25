@@ -30,7 +30,7 @@
 
             wallPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             wallPath.setAttribute('fill', 'none');
-            wallPath.setAttribute('stroke', '#888'); // Style to match the saved wall
+            wallPath.setAttribute('stroke', '#888');
             wallPath.setAttribute('stroke-width', '3');
             svg.appendChild(wallPath);
 
@@ -49,9 +49,41 @@
                 previewLine.remove();
                 previewLine = null;
             }
+
+            if (points.length > 1) {
+                const closedPathString = generatePathString() + " Z";
+                if (wallPath) {
+                    wallPath.setAttribute('d', closedPathString);
+                }
+                vaadinComponent.$server.updateShapePath(closedPathString);
+            }
         }
     };
 
+    /**
+     * Calculates the correct coordinates, snapping to a straight line if Shift is held.
+     */
+    function getSnappedCoordinates(event, rect) {
+        let x = event.clientX - rect.left;
+        let y = event.clientY - rect.top;
+
+        if (event.shiftKey && points.length > 0) {
+            const lastPoint = points[points.length - 1];
+            const dx = x - lastPoint.x;
+            const dy = y - lastPoint.y;
+
+            if (Math.abs(dx) > Math.abs(dy)) {
+                y = lastPoint.y;
+            } else {
+                x = lastPoint.x;
+            }
+        }
+        return { x, y };
+    }
+
+    /**
+     * Handles clicking on the canvas to add a new point.
+     */
     function handleCanvasClick(event) {
         if (!isDrawing || !vaadinComponent) return;
 
@@ -61,8 +93,8 @@
 
         const canvas = event.currentTarget;
         const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
+
+        const { x, y } = getSnappedCoordinates(event, rect);
 
         points.push({ x, y });
 
@@ -75,16 +107,21 @@
         vaadinComponent.$server.updateShapePath(pathString);
     }
 
+    /**
+     * Handles drawing the preview line as the mouse moves.
+     */
     function handleMouseMove(event) {
         if (!isDrawing || points.length === 0 || !previewLine) return;
         const canvas = event.currentTarget;
         const rect = canvas.getBoundingClientRect();
         const lastPoint = points[points.length - 1];
 
+        const { x: newX, y: newY } = getSnappedCoordinates(event, rect);
+
         previewLine.setAttribute('x1', lastPoint.x);
         previewLine.setAttribute('y1', lastPoint.y);
-        previewLine.setAttribute('x2', event.clientX - rect.left);
-        previewLine.setAttribute('y2', event.clientY - rect.top);
+        previewLine.setAttribute('x2', newX);
+        previewLine.setAttribute('y2', newY);
     }
 
     function generatePathString() {
