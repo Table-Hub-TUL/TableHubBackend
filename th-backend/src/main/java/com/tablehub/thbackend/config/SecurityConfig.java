@@ -91,7 +91,8 @@ public class SecurityConfig {
                                 "/offline.html",
                                 "/icons/**",
                                 "/images/**",
-                                "/styles/**"
+                                "/styles/**",
+                                "/ws/**"
                         ).permitAll()
                         .requestMatchers(
                                 "/h2-console/**",
@@ -103,10 +104,10 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_OWNER")
                         .anyRequest().authenticated()
                 )
-                .formLogin(form -> form
-                        .loginPage("/login").permitAll()
-                        .defaultSuccessUrl("/admin/restaurants", true)
-                )
+//                .formLogin(form -> form
+//                        .loginPage("/login").permitAll()
+//                        .defaultSuccessUrl("/admin/restaurants", true)
+//                )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )

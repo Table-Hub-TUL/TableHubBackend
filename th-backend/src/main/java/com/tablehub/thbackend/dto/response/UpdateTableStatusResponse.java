@@ -8,7 +8,6 @@ import lombok.Data;
 @AllArgsConstructor
 public class UpdateTableStatusResponse {
     private Long restaurantId;
-    private Long sectionId;
     private Long tableId;
     private boolean updateSuccess;
     private TableStatus resultingStatus;

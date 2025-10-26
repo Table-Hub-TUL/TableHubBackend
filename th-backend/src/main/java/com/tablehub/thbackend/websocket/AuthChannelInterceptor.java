@@ -31,29 +31,29 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
         StompHeaderAccessor accessor =
                 MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-            logger.info("Handling CONNECT command for new WebSocket session.");
-            String token = accessor.getFirstNativeHeader("Authorization");
-
-            if (token != null && token.startsWith("Bearer ")) {
-                token = token.substring(7);
-                logger.debug("Attempting to validate JWT token.");
-                if (jwtService.validateToken(token)) {
-                    String username = jwtService.getUserNameFromJwtToken(token);
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                    Authentication auth = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    accessor.setUser(auth); // Principal for WebSocket session
-                    logger.info("Successfully authenticated user '{}' for WebSocket session.", username);
-                } else {
-                    logger.error("Invalid JWT token provided. Denying connection.");
-                    throw new IllegalArgumentException("Invalid JWT token");
-                }
-            } else {
-                logger.error("Missing or invalid 'Authorization: Bearer' header. Denying connection.");
-                throw new IllegalArgumentException("Missing Authorization header");
-            }
-        }
+//        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+//            logger.info("Handling CONNECT command for new WebSocket session.");
+//            String token = accessor.getFirstNativeHeader("Authorization");
+//
+//            if (token != null && token.startsWith("Bearer ")) {
+//                token = token.substring(7);
+//                logger.debug("Attempting to validate JWT token.");
+//                if (jwtService.validateToken(token)) {
+//                    String username = jwtService.getUserNameFromJwtToken(token);
+//                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+//                    Authentication auth = new UsernamePasswordAuthenticationToken(
+//                            userDetails, null, userDetails.getAuthorities());
+//                    accessor.setUser(auth); // Principal for WebSocket session
+//                    logger.info("Successfully authenticated user '{}' for WebSocket session.", username);
+//                } else {
+//                    logger.error("Invalid JWT token provided. Denying connection.");
+//                    throw new IllegalArgumentException("Invalid JWT token");
+//                }
+//            } else {
+//                logger.error("Missing or invalid 'Authorization: Bearer' header. Denying connection.");
+//                throw new IllegalArgumentException("Missing Authorization header");
+//            }
+//        }
         return message;
     }
 }

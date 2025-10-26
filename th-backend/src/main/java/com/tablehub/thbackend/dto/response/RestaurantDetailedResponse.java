@@ -13,11 +13,13 @@ import java.util.List;
 public class RestaurantDetailedResponse {
     private Long id;
     private List<SectionDto> sections;
+    private String region;
 
     public RestaurantDetailedResponse(Restaurant restaurant) {
         this.id = restaurant.getId();
         this.sections = restaurant.getSections().stream()
                 .map(SectionDto::new)
                 .toList();
+        this.region = restaurant.getRegion();
     }
 }

@@ -6,12 +6,15 @@ import com.tablehub.thbackend.dto.request.UpdateTableStatusRequest;
 import com.tablehub.thbackend.dto.response.RestaurantStatusDto;
 import com.tablehub.thbackend.dto.response.RestaurantSubscriptionResponse;
 import com.tablehub.thbackend.dto.response.UpdateTableStatusResponse;
+import com.tablehub.thbackend.dto.websocket.TableUpdateEvent;
 import com.tablehub.thbackend.model.Restaurant;
 import com.tablehub.thbackend.model.RestaurantTable;
 import com.tablehub.thbackend.model.TableStatus;
 import com.tablehub.thbackend.repo.RestaurantRepository;
 import com.tablehub.thbackend.repo.RestaurantTableRepository;
 import com.tablehub.thbackend.service.interfaces.RestaurantService;
+import com.tablehub.thbackend.websocket.KafkaProducer;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     private final RestaurantRepository restaurantRepository;
     private final RestaurantTableRepository restaurantTableRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final KafkaProducer kafkaProducer;
 
     @Override
     @Transactional(readOnly = true)
@@ -48,22 +52,31 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     @Transactional
-    public UpdateTableStatusResponse updateTableStatus(UpdateTableStatusRequest request, String username) {
-        Optional<RestaurantTable> tableOpt = restaurantTableRepository.findByRestaurantSectionRestaurantIdAndRestaurantSectionIdAndId(
-                request.getRestaurantId(), request.getSectionId(), request.getTableId());
-
-        if (tableOpt.isEmpty()) {
-            return new UpdateTableStatusResponse(request.getRestaurantId(), request.getSectionId(), request.getTableId(),
-                    false, null, "Table not found.", 0);
+    public UpdateTableStatusResponse updateTableStatus(TableUpdateEvent request) {
+        RestaurantTable table = restaurantTableRepository.findByRestaurantSectionRestaurantIdAndId(
+                request.getRestaurantID(), request.getTableID()
+        ).orElseThrow(() -> new EntityNotFoundException("Cannot find requested table"));
+        if (table.getStatus().equals(request.getTableStatus())) {
+            return new UpdateTableStatusResponse(
+                    request.getRestaurantID(),
+                    request.getTableID(),
+                    false,
+                    request.getTableStatus(),
+                    "This table already has requested status",
+                    0
+            );
         }
-
-        RestaurantTable table = tableOpt.get();
-        table.setStatus(request.getRequestedStatus());
+        table.setStatus(request.getTableStatus());
         restaurantTableRepository.save(table);
-
-
-        return new UpdateTableStatusResponse(request.getRestaurantId(), request.getSectionId(), table.getId(),
-                true, table.getStatus(), "Table status updated successfully.", 0);
+        kafkaProducer.sendMessage(String.format("%s", request.getRegion()), request);
+        return new UpdateTableStatusResponse(
+                request.getRestaurantID(),
+                request.getTableID(),
+                true,
+                request.getTableStatus(),
+                "Successfully updated table status",
+                0
+        );
     }
 
     @Transactional(readOnly = true)

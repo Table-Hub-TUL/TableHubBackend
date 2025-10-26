@@ -12,4 +12,4 @@ FROM amazoncorretto:21.0.6-al2
 WORKDIR /app
 EXPOSE 8080
 COPY --from=build /app/target/*.jar ./th-backend.jar
-ENTRYPOINT ["java", "-jar", "/app/th-backend.jar"]
+ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "-jar", "/app/th-backend.jar"]

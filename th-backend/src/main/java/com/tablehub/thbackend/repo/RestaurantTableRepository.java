@@ -10,9 +10,8 @@ import java.util.Optional;
 
 public interface RestaurantTableRepository extends JpaRepository<RestaurantTable, Long> {
 
-    Optional<RestaurantTable> findByRestaurantSectionRestaurantIdAndRestaurantSectionIdAndId(
+    Optional<RestaurantTable> findByRestaurantSectionRestaurantIdAndId(
             Long restaurantId,
-            Long sectionId,
             Long tableId
     );
 

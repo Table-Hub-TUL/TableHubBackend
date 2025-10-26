@@ -3,8 +3,10 @@ package com.tablehub.thbackend.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.locationtech.jts.geom.Point;
+
 import java.util.List;
 
 @Entity
@@ -38,6 +40,11 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant")
     @JsonManagedReference("restaurant-sections")
     private List<RestaurantSection> sections;
+
+    // TODO: Review maybe create separate table and add automatic region selection
+    @Column(nullable = false)
+    @Pattern(regexp = "^tables\\.[a-z0-9-]+(?:\\.[a-z0-9-]+){2}$")
+    private String region;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")

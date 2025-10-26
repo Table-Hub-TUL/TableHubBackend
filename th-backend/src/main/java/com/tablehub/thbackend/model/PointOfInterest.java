@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Embeddable
-// TODO: missing List<Integer> otherSectionPoiLink; id; check if needed
 public class PointOfInterest {
     private double id;
 

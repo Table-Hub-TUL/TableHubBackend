@@ -1,26 +1,69 @@
 version: '3.8'
 
 services:
-  th-backend:
-    build: 
-      context: ./th-backend
-      dockerfile: Dockerfile
-    container_name: th-backend
-    ports:
-      - "8080:8080"
+  # --- KAFKA AND ZOOKEEPER SERVICES ---
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.3
+    container_name: zookeeper
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://th-db:5432/th_backend
-      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-postgres}
-      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-password}
-      - JWT_SECRET=${JWT_SECRET:-mysecretkey}
-      - JWT_TIME=${JWT_TIME:-86400000}
-    depends_on:
-      - th-db
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
     networks:
       - backend
     restart: unless-stopped
 
+  kafka:
+    image: confluentinc/cp-kafka:7.5.3
+    container_name: kafka
+    environment:
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181 # Uses the Zookeeper service name
+      # Listeners for internal Docker network (kafka) and external access (localhost)
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+    ports:
+      # Expose 29092 for tools on the host machine to connect (e.g., Kafka UI)
+      - "29092:29092"
+    depends_on:
+      - zookeeper
+    networks:
+      - backend
+    restart: unless-stopped
+  
+  # --- TH-BACKEND SERVICE (UPDATED) ---
+  th-backend:
+    build:
+      context: ./th-backend
+      dockerfile: Dockerfile
+    container_name: th-backend
+    ports:
+      - "5005:5005"
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      # Database connection remains the same
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://th-db:5432/th_backend
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-password}
+      # Set Kafka Bootstrap Servers to use the Kafka service name and port
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092 
+      - JWT_SECRET=${JWT_SECRET:-mysecretkey}
+      - JWT_TIME=${JWT_TIME:-86400000}
+    # ADDED: Depends on Kafka now, as well as the DB
+    depends_on:
+      - th-db
+      - kafka 
+    networks:
+      - backend
+    restart: unless-stopped
+
+  # --- TH-DB SERVICE (NO CHANGE) ---
   th-db:
     image: postgis/postgis:15-3.4
     container_name: th-db

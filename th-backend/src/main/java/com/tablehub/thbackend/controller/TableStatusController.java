@@ -1,14 +1,21 @@
 package com.tablehub.thbackend.controller;
 
 import com.tablehub.thbackend.dto.request.TableUpdateRequest;
+import com.tablehub.thbackend.dto.response.UpdateTableStatusResponse;
+import com.tablehub.thbackend.dto.websocket.TableUpdateEvent;
 import com.tablehub.thbackend.model.RestaurantTable;
 import com.tablehub.thbackend.repo.RestaurantTableRepository;
+import com.tablehub.thbackend.service.interfaces.RestaurantService;
+import com.tablehub.thbackend.websocket.KafkaProducer;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -23,18 +30,12 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/table")
+@RequiredArgsConstructor
 @Tag(name = "Table Status Update", description = "Api for managing tables statuses")
 public class TableStatusController {
     private static final Logger logger = LoggerFactory.getLogger(TableStatusController.class);
 
-    private final RestaurantTableRepository tableRepository;
-    private final SimpMessagingTemplate messagingTemplate;
-
-    public TableStatusController(RestaurantTableRepository tableRepository,
-                                 SimpMessagingTemplate messagingTemplate) {
-        this.tableRepository = tableRepository;
-        this.messagingTemplate = messagingTemplate;
-    }
+    private final RestaurantService restaurantService;
 
     @PostMapping("/update-status")
     @Operation(
@@ -67,29 +68,16 @@ public class TableStatusController {
                     )
             )
     })
-    public ResponseEntity<String> updateTableStatus(@RequestBody TableUpdateRequest request) {
-        logger.info("Received request to update table status for table ID: {}", request.getTableId());
-        Optional<RestaurantTable> optionalTable = tableRepository.findById(request.getTableId());
+    public ResponseEntity<?> updateTableStatus(@RequestBody TableUpdateEvent request) {
+        logger.info("Received request to update table status for table ID: {}", request.getTableID());
 
-        if (optionalTable.isEmpty()) {
-            logger.warn("Table with ID {} not found.", request.getTableId());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Table not found");
+        try {
+            UpdateTableStatusResponse response = restaurantService.updateTableStatus(request);
+            logger.info("Successfully updated status for table ID: {} to {}",
+                    response.getTableId(), response.getResultingStatus());
+            return ResponseEntity.ok(response);
+        } catch (EntityNotFoundException ex) {
+            return (ResponseEntity<?>) ResponseEntity.notFound();
         }
-
-        RestaurantTable table = optionalTable.get();
-
-        if (!table.getRestaurantSection().getId().equals(request.getSectionId()) ||
-                !table.getRestaurantSection().getRestaurant().getId().equals(request.getRestaurantId())) {
-            logger.error("Mismatch in section or restaurant ID for table ID: {}", request.getTableId());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid section or restaurant");
-        }
-
-        table.setStatus(request.getRequestedStatus());
-        tableRepository.save(table);
-        logger.info("Successfully updated status for table ID: {} to {}", request.getTableId(), request.getRequestedStatus());
-
-        messagingTemplate.convertAndSend("/topic/table-updates", request);
-        logger.info("Broadcasted table update for table ID: {} via WebSocket.", request.getTableId());
-        return ResponseEntity.ok("Table status updated");
     }
 }

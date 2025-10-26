@@ -20,8 +20,9 @@ public class RestaurantSimpleResponse {
     private Address address;
     private Location location;
     private Double rating = 0.0;
+    private String region;
 
-    public  RestaurantSimpleResponse(Restaurant restaurant) {
+    public RestaurantSimpleResponse(Restaurant restaurant) {
         this.id = restaurant.getId();
         this.name = restaurant.getName();
         this.cuisine = List.of(restaurant.getCuisineName());
@@ -30,5 +31,6 @@ public class RestaurantSimpleResponse {
             this.location = new Location(restaurant.getLocation().getY(), restaurant.getLocation().getX());
         }
         this.rating = restaurant.getRating();
+        this.region = restaurant.getRegion();
     }
 }
