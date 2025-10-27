@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class TableStatusServiceImpl implements TableStatusService {
 
     private final RestaurantTableRepository tableRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     @Transactional
@@ -34,19 +36,32 @@ public class TableStatusServiceImpl implements TableStatusService {
 
         if (!table.getRestaurantSection().getId().equals(request.getSectionId()) ||
                 !table.getRestaurantSection().getRestaurant().getId().equals(request.getRestaurantId())) {
-
             logger.error("Mismatch in section or restaurant ID for table ID: {}", request.getTableId());
             throw new InvalidTableDataException("Invalid section or restaurant");
         }
 
+        // --- TODO: Add Points Logic Here ---
+
         table.setStatus(request.getRequestedStatus());
         tableRepository.save(table);
-        logger.info("Successfully saved status for table ID: {} to {}", request.getTableId(), request.getRequestedStatus());
+        logger.info("Successfully saved status for table ID: {} to {}", request.getTableId(), table.getStatus());
+
+        // --- TODO: If points awarded, save PointsAction entity ---
+
+        TableUpdateRequest notificationPayload = new TableUpdateRequest();
+        notificationPayload.setRestaurantId(request.getRestaurantId());
+        notificationPayload.setSectionId(request.getSectionId());
+        notificationPayload.setTableId(request.getTableId());
+        notificationPayload.setRequestedStatus(table.getStatus());
+
+        String individualTopic = "/topic/table-updates/" + request.getRestaurantId();
+        messagingTemplate.convertAndSend(individualTopic, notificationPayload);
+        logger.info("Broadcasted individual update for table ID: {} using {} payload to topic {}",
+                request.getTableId(), notificationPayload.getClass().getSimpleName(), individualTopic);
 
         Long restaurantId = table.getRestaurantSection().getRestaurant().getId();
         TableUpdateJob job = new TableUpdateJob(restaurantId);
         rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE_NAME, RabbitConfig.ROUTING_KEY, job);
-
-        logger.info("Dispatched table update job for restaurant ID: {}", restaurantId);
+        logger.info("Dispatched aggregate update job for restaurant ID: {}", restaurantId);
     }
 }
