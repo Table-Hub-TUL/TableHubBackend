@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>STOMP WebSocket Test</title>
+    <!-- Load STOMP library -->
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+</head>
+<body>
+<h2>STOMP WebSocket Test</h2>
+<div id="status" style="color: red; font-weight: bold;">Not connected</div>
+
+<div>
+    <strong>Token:</strong> <input type="text" id="jwtToken" value="PASTE_TOKEN_HERE" style="width: 400px;">
+    <button onclick="connect()">Connect</button>
+    <button onclick="disconnect()">Disconnect</button>
+</div>
+
+<div style="margin-top: 10px;">
+    <button onclick="subscribe()" id="subscribeBtn" disabled>Subscribe to Topics</button>
+    <button onclick="sendHttpUpdate()" id="sendUpdateBtn" disabled>Send HTTP Update (Triggers WS)</button>
+</div>
+
+<h3>Messages:</h3>
+<div id="messages" style="border: 1px solid #ccc; background: #f4f4f4; min-height: 200px; padding: 5px;"></div>
+
+<script>
+    let stompClient = null;
+    let jwtToken = ''; // Will be set from input
+
+    function connect() {
+        jwtToken = document.getElementById('jwtToken').value;
+        if (jwtToken === 'PASTE_TOKEN_HERE' || !jwtToken) {
+            alert('Please paste a valid JWT token first.');
+            return;
+        }
+
+        // --- FIX 1 (Already done): Pass token in URL for JwtHandshakeInterceptor ---
+        const socketUrl = `ws://localhost:8080/ws?token=${jwtToken}`;
+
+        stompClient = new StompJs.Client({
+            brokerURL: socketUrl, // Use brokerURL which handles the WebSocket creation
+
+            // --- FIX 2 (NEW): Pass token in STOMP headers for AuthChannelInterceptor ---
+            connectHeaders: {
+                Authorization: `Bearer ${jwtToken}`
+            },
+
+            debug: (str) => {
+                console.log('STOMP: ' + str);
+            },
+            onConnect: (frame) => {
+                document.getElementById('status').innerText = 'Connected';
+                document.getElementById('status').style.color = 'green';
+                document.getElementById('subscribeBtn').disabled = false;
+                document.getElementById('sendUpdateBtn').disabled = false;
+                console.log('Connected: ' + frame);
+            },
+            onStompError: (frame) => {
+                console.error('Broker error: ' + frame.headers['message']);
+                console.error('Details: ' + frame.body);
+                document.getElementById('status').innerText = 'Connection Error (STOMP)';
+                document.getElementById('status').style.color = 'red';
+            },
+            onWebSocketError: (event) => {
+                console.error('WebSocket error: ', event);
+                document.getElementById('status').innerText = 'Connection Error (WebSocket)';
+                document.getElementById('status').style.color = 'red';
+            }
+        });
+
+        stompClient.activate();
+    }
+
+    function disconnect() {
+        if (stompClient !== null) {
+            stompClient.deactivate();
+            document.getElementById('status').innerText = 'Disconnected';
+            document.getElementById('status').style.color = 'red';
+            document.getElementById('subscribeBtn').disabled = true;
+            document.getElementById('sendUpdateBtn').disabled = true;
+            console.log("Disconnected");
+        }
+    }
+
+    function subscribe() {
+        if (stompClient && stompClient.connected) {
+            // Subscribe to aggregate updates
+            stompClient.subscribe('/topic/restaurant-aggregates', (message) => {
+                showMessage('Aggregate: ' + message.body);
+            }, { id: 'sub-agg' });
+
+            // Subscribe to specific restaurant updates (e.g., restaurant ID 1)
+            stompClient.subscribe('/topic/table-updates/1', (message) => {
+                showMessage('Table Update: ' + message.body);
+            }, { id: 'sub-ind' });
+
+            showMessage('Subscribed to topics: /topic/restaurant-aggregates and /topic/table-updates/1');
+        } else {
+            alert('Not connected. Please connect first.');
+        }
+    }
+
+    // --- PROBLEM 2 FIX ---
+    // The server expects an HTTP POST, not a STOMP 'send'
+    async function sendHttpUpdate() {
+        jwtToken = document.getElementById('jwtToken').value; // Ensure token is fresh
+        if (!jwtToken || jwtToken === 'PASTE_TOKEN_HERE') {
+            alert('Invalid token.');
+            return;
+        }
+
+        const updateRequest = {
+            restaurantId: 1,
+            sectionId: 1,
+            tableId: 1,
+            requestedStatus: 'OCCUPIED' // Change to 'AVAILABLE' to toggle
+        };
+
+        try {
+            const response = await fetch('http://localhost:8080/api/table/update-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwtToken}`
+                },
+                body: JSON.stringify(updateRequest)
+            });
+
+            if (response.ok) {
+                showMessage('Sent HTTP update successfully. Waiting for WebSocket messages...');
+            } else {
+                const errorText = await response.text();
+                showMessage(`Failed to send HTTP update: ${response.status} ${errorText}`);
+            }
+        } catch (error) {
+            console.error('Error sending HTTP update:', error);
+            showMessage(`Error sending HTTP update: ${error.message}`);
+        }
+    }
+
+    function showMessage(message) {
+        const messagesDiv = document.getElementById('messages');
+        const p = document.createElement('p');
+        p.style.margin = '2px 0';
+        p.style.borderBottom = '1px solid #eee';
+        p.innerText = new Date().toLocaleTimeString() + ': ' + message;
+        messagesDiv.prepend(p); // Add new messages to the top
+    }
+</script>
+</body>
+</html>
