@@ -17,7 +17,8 @@
 
 <div style="margin-top: 10px;">
     <button onclick="subscribe()" id="subscribeBtn" disabled>Subscribe to Topics</button>
-    <button onclick="sendHttpUpdate()" id="sendUpdateBtn" disabled>Send HTTP Update (Triggers WS)</button>
+    <button onclick="unsubscribeIndividual()" id="unsubscribeIndBtn" disabled>Unsubscribe Individual</button>
+    <!-- Removed Send HTTP Update button -->
 </div>
 
 <h3>Messages:</h3>
@@ -26,6 +27,7 @@
 <script>
     let stompClient = null;
     let jwtToken = ''; // Will be set from input
+    let individualSubscription = null; // Store the individual subscription object
 
     function connect() {
         jwtToken = document.getElementById('jwtToken').value;
@@ -34,13 +36,13 @@
             return;
         }
 
-        // --- FIX 1 (Already done): Pass token in URL for JwtHandshakeInterceptor ---
+        // Pass token in URL for JwtHandshakeInterceptor
         const socketUrl = `ws://localhost:8080/ws?token=${jwtToken}`;
 
         stompClient = new StompJs.Client({
-            brokerURL: socketUrl, // Use brokerURL which handles the WebSocket creation
+            brokerURL: socketUrl,
 
-            // --- FIX 2 (NEW): Pass token in STOMP headers for AuthChannelInterceptor ---
+            // Pass token in STOMP headers for AuthChannelInterceptor
             connectHeaders: {
                 Authorization: `Bearer ${jwtToken}`
             },
@@ -52,7 +54,8 @@
                 document.getElementById('status').innerText = 'Connected';
                 document.getElementById('status').style.color = 'green';
                 document.getElementById('subscribeBtn').disabled = false;
-                document.getElementById('sendUpdateBtn').disabled = false;
+                // Keep unsubscribe disabled until subscription happens
+                document.getElementById('unsubscribeIndBtn').disabled = true;
                 console.log('Connected: ' + frame);
             },
             onStompError: (frame) => {
@@ -60,11 +63,20 @@
                 console.error('Details: ' + frame.body);
                 document.getElementById('status').innerText = 'Connection Error (STOMP)';
                 document.getElementById('status').style.color = 'red';
+                disableButtonsOnDisconnect();
             },
             onWebSocketError: (event) => {
                 console.error('WebSocket error: ', event);
                 document.getElementById('status').innerText = 'Connection Error (WebSocket)';
                 document.getElementById('status').style.color = 'red';
+                disableButtonsOnDisconnect();
+            },
+            onDisconnect: () => {
+                document.getElementById('status').innerText = 'Disconnected';
+                document.getElementById('status').style.color = 'red';
+                disableButtonsOnDisconnect();
+                console.log("Disconnected");
+                individualSubscription = null; // Clear subscription reference
             }
         });
 
@@ -73,70 +85,47 @@
 
     function disconnect() {
         if (stompClient !== null) {
-            stompClient.deactivate();
-            document.getElementById('status').innerText = 'Disconnected';
-            document.getElementById('status').style.color = 'red';
-            document.getElementById('subscribeBtn').disabled = true;
-            document.getElementById('sendUpdateBtn').disabled = true;
-            console.log("Disconnected");
+            stompClient.deactivate(); // onDisconnect callback will handle UI updates
         }
+    }
+
+    function disableButtonsOnDisconnect() {
+        document.getElementById('subscribeBtn').disabled = true;
+        document.getElementById('unsubscribeIndBtn').disabled = true;
     }
 
     function subscribe() {
         if (stompClient && stompClient.connected) {
-            // Subscribe to aggregate updates
+            // Subscribe to aggregate updates (no need to store this one for now)
             stompClient.subscribe('/topic/restaurant-aggregates', (message) => {
                 showMessage('Aggregate: ' + message.body);
-            }, { id: 'sub-agg' });
+            }, { id: 'sub-agg' }); // Use a unique ID
 
             // Subscribe to specific restaurant updates (e.g., restaurant ID 1)
-            stompClient.subscribe('/topic/table-updates/1', (message) => {
+            // Store the subscription object to allow unsubscribing later
+            individualSubscription = stompClient.subscribe('/topic/table-updates/1', (message) => {
                 showMessage('Table Update: ' + message.body);
-            }, { id: 'sub-ind' });
+            }, { id: 'sub-ind' }); // Use a different unique ID
 
             showMessage('Subscribed to topics: /topic/restaurant-aggregates and /topic/table-updates/1');
+            document.getElementById('unsubscribeIndBtn').disabled = false; // Enable unsubscribe button
         } else {
             alert('Not connected. Please connect first.');
         }
     }
 
-    // --- PROBLEM 2 FIX ---
-    // The server expects an HTTP POST, not a STOMP 'send'
-    async function sendHttpUpdate() {
-        jwtToken = document.getElementById('jwtToken').value; // Ensure token is fresh
-        if (!jwtToken || jwtToken === 'PASTE_TOKEN_HERE') {
-            alert('Invalid token.');
-            return;
-        }
-
-        const updateRequest = {
-            restaurantId: 1,
-            sectionId: 1,
-            tableId: 1,
-            requestedStatus: 'OCCUPIED' // Change to 'AVAILABLE' to toggle
-        };
-
-        try {
-            const response = await fetch('http://localhost:8080/api/table/update-status', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${jwtToken}`
-                },
-                body: JSON.stringify(updateRequest)
-            });
-
-            if (response.ok) {
-                showMessage('Sent HTTP update successfully. Waiting for WebSocket messages...');
-            } else {
-                const errorText = await response.text();
-                showMessage(`Failed to send HTTP update: ${response.status} ${errorText}`);
-            }
-        } catch (error) {
-            console.error('Error sending HTTP update:', error);
-            showMessage(`Error sending HTTP update: ${error.message}`);
+    function unsubscribeIndividual() {
+        if (individualSubscription) {
+            individualSubscription.unsubscribe();
+            individualSubscription = null; // Clear the reference
+            showMessage('Unsubscribed from /topic/table-updates/1');
+            document.getElementById('unsubscribeIndBtn').disabled = true; // Disable after unsubscribing
+        } else {
+            showMessage('Not currently subscribed to the individual topic or already unsubscribed.');
         }
     }
+
+    // Removed sendHttpUpdate function
 
     function showMessage(message) {
         const messagesDiv = document.getElementById('messages');
