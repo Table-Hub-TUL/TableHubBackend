@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  IMAGE_NAME: tablehub-backend
+  IMAGE_NAME: ${{github.repository}}
 
 jobs:
   build-and-push:
