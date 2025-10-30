@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  IMAGE_NAME: tablehub-backend
+  IMAGE_NAME: ${{github.repository}}
 
 jobs:
   build-and-push:
@@ -44,8 +44,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: th-backend
-          file: th-backend/Dockerfile
+          context: .
+          file: ./Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
