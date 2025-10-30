@@ -37,13 +37,13 @@ build/
 *.env
 
 *.DS_Store
-th-backend/.vaadin-node-tasks.lock
-th-backend/node_modules/
-th-backend/package-lock.json
-th-backend/package.json
-th-backend/src/main/frontend/generated/
-th-backend/src/main/frontend/index.html
-th-backend/tsconfig.json
-th-backend/types.d.ts
-th-backend/vite.config.ts
-th-backend/vite.generated.ts
+.vaadin-node-tasks.lock
+node_modules/
+package-lock.json
+package.json
+src/main/frontend/generated/
+src/main/frontend/index.html
+tsconfig.json
+types.d.ts
+vite.config.ts
+vite.generated.ts
