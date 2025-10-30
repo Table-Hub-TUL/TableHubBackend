@@ -15,8 +15,13 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-password}
       - JWT_SECRET=${JWT_SECRET:-mysecretkey}
       - JWT_TIME=${JWT_TIME:-86400000}
+      - SPRING_RABBITMQ_HOST=th-rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
     depends_on:
       - th-db
+      - th-rabbitmq
     networks:
       - backend
     restart: unless-stopped
@@ -32,6 +37,19 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    restart: unless-stopped
+
+  th-rabbitmq:
+    image: rabbitmq:3-management
+    container_name: th-rabbitmq
+    ports:
+      - "5672:5672"     # RabbitMQ message port
+      - "15672:15672"   # RabbitMQ management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
     networks:
       - backend
     restart: unless-stopped
