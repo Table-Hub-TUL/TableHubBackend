@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  IMAGE_NAME: ${{github.repository}}
+  IMAGE_NAME: tablehub-backend
 
 jobs:
   build-and-push:
@@ -19,11 +19,6 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
-
-      - name: Create th-backend/.env from secret (base64 decoded)
-        run: |
-          printf '%s' "${{ secrets.DOTENV }}" | base64 --decode > th-backend/.env
-          chmod 600 th-backend/.env
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -38,14 +33,14 @@ jobs:
         with:
           images: ghcr.io/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=branch,pattern=main,latest=true
+            type=branch,pattern=main,latest=true
             type=sha,prefix=
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: th-backend
-          file: th-backend/Dockerfile
+          context: .
+          file: ./Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
