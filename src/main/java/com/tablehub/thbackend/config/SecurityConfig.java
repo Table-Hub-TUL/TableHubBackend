@@ -91,7 +91,8 @@ public class SecurityConfig {
                                 "/offline.html",
                                 "/icons/**",
                                 "/images/**",
-                                "/styles/**"
+                                "/styles/**",
+                                "/healthcheck/**"
                         ).permitAll()
                         .requestMatchers(
                                 "/h2-console/**",

@@ -2,8 +2,8 @@ version: '3.8'
 
 services:
   th-backend:
-    build: 
-      context: ./th-backend
+    build:
+      context: .
       dockerfile: Dockerfile
     container_name: th-backend
     ports:
