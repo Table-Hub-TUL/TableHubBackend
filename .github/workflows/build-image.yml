@@ -22,8 +22,8 @@ jobs:
 
       - name: Create th-backend/.env from secret (base64 decoded)
         run: |
-          printf '%s' "${{ secrets.DOTENV }}" | base64 --decode > th-backend/.env
-          chmod 600 th-backend/.env
+          printf '%s' "${{ secrets.DOTENV }}" | base64 --decode > .env
+          chmod 600 .env
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
