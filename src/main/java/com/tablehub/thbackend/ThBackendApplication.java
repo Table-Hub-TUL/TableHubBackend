@@ -15,7 +15,7 @@ public class ThBackendApplication {
                 .load();
         System.setProperty("JWT_SECRET", dotenv.get("JWT_SECRET"));
         System.setProperty("JWT_TIME", dotenv.get("JWT_TIME"));
-        System.setProperty("HEALTHCHECK_TOKEN", dotenv.get("HEALTHCHECK_TOKEN"));
+//        System.setProperty("HEALTHCHECK_TOKEN", dotenv.get("HEALTHCHECK_TOKEN"));
         SpringApplication.run(ThBackendApplication.class, args);
     }
 }
