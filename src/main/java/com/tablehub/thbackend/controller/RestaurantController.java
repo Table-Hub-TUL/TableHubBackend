@@ -7,8 +7,8 @@ import com.tablehub.thbackend.model.CuisineName;
 import com.tablehub.thbackend.model.Restaurant;
 import com.tablehub.thbackend.service.interfaces.RestaurantDataService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -20,6 +20,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -101,6 +102,39 @@ public class RestaurantController {
         } else {
             logger.warn("Restaurant with ID: {} was not found.", restaurantId);
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @Operation(
+            summary = "Get list of all available cuisines",
+            description = "Returns a list of all cuisine types available in the system for filtering and categorization purposes"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved cuisine list",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CuisineName.class),
+                            examples = @ExampleObject(
+                                    value = "[\"ITALIAN\", \"POLISH\", \"MEXICAN\", \"JAPANESE\"]"
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error occurred while fetching cuisine list",
+                    content = @Content
+            )
+    })
+    @GetMapping("/cuisine-list")
+    public ResponseEntity<List<CuisineName>> getCuisineList() {
+        logger.info("Received request to get cuisine list");
+        try{
+            return ResponseEntity.ok(Arrays.asList(CuisineName.values()));
+        }
+        catch (Exception e){
+            return ResponseEntity.internalServerError().build();
         }
     }
 }
