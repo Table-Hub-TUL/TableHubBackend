@@ -3,7 +3,7 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:resolve
 COPY src ./src
-COPY .mvn ./.mvn
+COPY wrapper ./wrapper
 COPY mvnw .
 COPY mvnw.cmd .
 RUN mvn clean package -DskipTests
