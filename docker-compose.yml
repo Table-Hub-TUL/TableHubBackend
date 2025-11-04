@@ -27,7 +27,7 @@ services:
     restart: unless-stopped
 
   th-db:
-    image: postgis/postgis:17-master
+    image: postgis/postgis:16-3.4
     container_name: th-db
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-th_backend}
