@@ -1,14 +1,17 @@
-FROM maven:3.9.9-amazoncorretto-21 AS build
+FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY pom.xml .
+COPY package.json .
+COPY package-lock.json* .
 RUN mvn dependency:resolve
+
 COPY src ./src
 COPY wrapper ./wrapper
 COPY mvnw .
 COPY mvnw.cmd .
-RUN mvn clean package -DskipTests
+RUN mvn clean package -Pproduction -DskipTests
 
-FROM amazoncorretto:21.0.6-al2
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 EXPOSE 8080
 COPY --from=build /app/target/*.jar ./th-backend.jar
