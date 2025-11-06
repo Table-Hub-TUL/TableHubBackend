@@ -63,9 +63,9 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
+                )
+                .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -76,11 +76,10 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain vaadinUiFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/",
+                                "/**",
                                 "/?v-r=init&**",
                                 "/favicon.ico",
                                 "/offline-stub.html",
