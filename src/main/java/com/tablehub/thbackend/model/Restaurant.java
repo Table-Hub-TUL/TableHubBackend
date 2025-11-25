@@ -6,10 +6,12 @@ import jakarta.persistence.Table;
 import lombok.*;
 import org.locationtech.jts.geom.Point;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "restaurant")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -42,4 +44,16 @@ public class Restaurant {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private AppUser owner;
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Restaurant other)) return false;
+        return Objects.equals(id, other.id);
+    }
 }
