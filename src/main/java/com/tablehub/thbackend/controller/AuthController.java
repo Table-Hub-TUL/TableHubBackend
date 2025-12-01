@@ -1,15 +1,20 @@
 package com.tablehub.thbackend.controller;
 
+import com.tablehub.thbackend.dto.request.TokenRefreshRequest;
 import com.tablehub.thbackend.dto.response.AuthJwtResponse;
 import com.tablehub.thbackend.dto.request.AuthLoginRequest;
 import com.tablehub.thbackend.dto.response.AuthMessageResponse;
 import com.tablehub.thbackend.dto.request.AuthSignUpRequest;
+import com.tablehub.thbackend.exception.TokenRefreshException;
 import com.tablehub.thbackend.model.AppUser;
+import com.tablehub.thbackend.model.RefreshToken;
 import com.tablehub.thbackend.model.Role;
 import com.tablehub.thbackend.model.RoleName;
 import com.tablehub.thbackend.repo.RoleRepository;
 import com.tablehub.thbackend.repo.UserRepository;
+import com.tablehub.thbackend.security.auth.UserPrinciple;
 import com.tablehub.thbackend.service.implementations.JwtService;
+import com.tablehub.thbackend.service.implementations.RefreshTokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -50,6 +55,7 @@ public class AuthController {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtProvider;
+    private final RefreshTokenService refreshTokenService;
 
     @Operation(
             summary = "Sign in user",
@@ -91,8 +97,12 @@ public class AuthController {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
             log.info("User '{}' authenticated successfully. Issuing JWT.", userDetails.getUsername());
+            AppUser appUser = userRepository.findByUserName(userDetails.getUsername()).orElseThrow();
 
-            AuthJwtResponse responseBody = new AuthJwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities());
+            // Generate Refresh Token
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(appUser.getId());
+
+            AuthJwtResponse responseBody = new AuthJwtResponse(jwt, refreshToken.getToken(), userDetails.getUsername(), userDetails.getAuthorities());
             return ResponseEntity.ok(responseBody);
 
         } catch (AuthenticationException e) {
@@ -100,6 +110,33 @@ public class AuthController {
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error: Invalid credentials");
         }
+    }
+
+    @PostMapping("/refresh")
+    @Operation(summary = "Refresh Access Token", description = "Get a new Access Token using a valid Refresh Token")
+    public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
+        String requestRefreshToken = request.getRefreshToken();
+
+        return refreshTokenService.findByToken(requestRefreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    // Create new Access Token
+                    String token = jwtProvider.generateToken(UserPrinciple.build(user));
+
+                    // Rotate Refresh Token (Optional but recommended security practice)
+                    // This deletes the used refresh token and creates a new one
+                    RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getId());
+
+                    return ResponseEntity.ok(new AuthJwtResponse(
+                            token,
+                            newRefreshToken.getToken(),
+                            user.getUserName(),
+                            UserPrinciple.build(user).getAuthorities()
+                    ));
+                })
+                .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
+                        "Refresh token is not in database!"));
     }
 
 
