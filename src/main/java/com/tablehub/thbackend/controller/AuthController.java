@@ -154,8 +154,6 @@ public class AuthController {
                     // Create new Access Token
                     String token = jwtProvider.generateToken(UserPrinciple.build(user));
 
-                    // Rotate Refresh Token (Optional but recommended security practice)
-                    // This deletes the used refresh token and creates a new one
                     RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getId());
 
                     return ResponseEntity.ok(new AuthJwtResponse(

@@ -29,15 +29,19 @@ public class RefreshTokenService {
 
     @Transactional
     public RefreshToken createRefreshToken(Long userId) {
-        // Enforce Refresh Token Rotation: Delete old token for user before creating a new one
-        var user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        refreshTokenRepository.deleteByUser(user);
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        RefreshToken refreshToken = new RefreshToken();
+        // Try to find the existing token for this user
+        RefreshToken refreshToken = refreshTokenRepository.findByUser(user)
+                .orElse(new RefreshToken());
+
+        // Update the fields (if it existed, ID is preserved; if not, ID is null/generated)
         refreshToken.setUser(user);
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         refreshToken.setToken(UUID.randomUUID().toString());
 
+        // Save (Hibernate will perform UPDATE if ID exists, INSERT if not)
         return refreshTokenRepository.save(refreshToken);
     }
 
