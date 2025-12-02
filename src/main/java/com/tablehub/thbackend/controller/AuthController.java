@@ -1,5 +1,6 @@
 package com.tablehub.thbackend.controller;
 
+import com.tablehub.thbackend.dto.request.ChangePasswordRequest;
 import com.tablehub.thbackend.dto.request.TokenRefreshRequest;
 import com.tablehub.thbackend.dto.response.AuthJwtResponse;
 import com.tablehub.thbackend.dto.request.AuthLoginRequest;
@@ -28,12 +29,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsPasswordService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -56,6 +59,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtProvider;
     private final RefreshTokenService refreshTokenService;
+    private final UserDetailsPasswordService passwordService;
 
     @Operation(
             summary = "Sign in user",
@@ -112,9 +116,35 @@ public class AuthController {
         }
     }
 
+    @Operation(
+            summary = "Refresh access token",
+            description = "Generates a new JWT access token and refresh token using a valid refresh token. The provided refresh token will be rotated (invalidated) and a new one will be issued for enhanced security."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully refreshed tokens",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = AuthJwtResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Refresh token expired or invalid",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad request - Invalid input",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
     @PostMapping("/refresh")
-    @Operation(summary = "Refresh Access Token", description = "Get a new Access Token using a valid Refresh Token")
-    public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
+    public ResponseEntity<?> refreshtoken(@Valid
+                                          @RequestBody
+                                          @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Refresh token request", required = true, content = @Content(schema = @Schema(implementation = TokenRefreshRequest.class)))
+                                          TokenRefreshRequest request) {
         String requestRefreshToken = request.getRefreshToken();
 
         return refreshTokenService.findByToken(requestRefreshToken)
@@ -139,6 +169,77 @@ public class AuthController {
                         "Refresh token is not in database!"));
     }
 
+    @Operation(
+            summary = "Change password",
+            description = "Changes the password for the currently authenticated user. Requires the current password for verification before setting the new password."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Password changed successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = AuthMessageResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - User not authenticated or current password incorrect",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad request - Invalid input",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@Valid
+                                            @RequestBody
+                                            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Password change request with current and new password", required = true, content = @Content(schema = @Schema(implementation = ChangePasswordRequest.class)))
+                                            ChangePasswordRequest request) {
+
+        // 1. Get the current authenticated UserDetails principal
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error: Unauthorized");
+        }
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        // 2. Check if the old password matches the one in UserDetails (which contains the DB hash)
+        if (!passwordEncoder.matches(request.getCurrentPassword(), userDetails.getPassword())) {
+            throw new BadCredentialsException("Current password does not match.");
+        }
+
+        // 3. Encode the new password
+        String encodedNewPassword = passwordEncoder.encode(request.getNewPassword());
+
+        // 4. Update using the standard service interface
+        passwordService.updatePassword(userDetails, encodedNewPassword);
+
+        return ResponseEntity.ok(new AuthMessageResponse("Password changed successfully!"));
+    }
+
+
+    @PostMapping("/logout")
+    @Operation(summary = "Logout User", description = "Revokes the user's refresh token, effectively logging them out.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Log out successful"),
+            @ApiResponse(responseCode = "403", description = "Refresh token invalid or not found")
+    })
+    public ResponseEntity<?> logoutUser(@Valid @RequestBody TokenRefreshRequest request) {
+        String requestRefreshToken = request.getRefreshToken();
+
+        return refreshTokenService.findByToken(requestRefreshToken)
+                .map(token -> {
+                    refreshTokenService.deleteByUserId(token.getUser().getId());
+                    return ResponseEntity.ok(new AuthMessageResponse("Log out successful!"));
+                })
+                .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
+                        "Refresh token is not in database!"));
+    }
 
     @Operation(
             summary = "Register new user",
