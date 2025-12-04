@@ -2,6 +2,7 @@ package com.tablehub.thbackend.repo;
 
 import com.tablehub.thbackend.model.AppUser;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -10,4 +11,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<AppUser, Long> {
     Optional<AppUser> findByUserName(String userName);
     Boolean existsByUserName(String userName);
+
+    @Query("SELECT COUNT(u) FROM AppUser u WHERE u.points > :points")
+    long countByPointsGreaterThan(int points);
 }
