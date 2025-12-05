@@ -1,4 +1,111 @@
 package com.tablehub.thbackend.service.implementations;
 
-public class UserServiceImpl {
+import com.tablehub.thbackend.dto.request.ChangePasswordRequest;
+import com.tablehub.thbackend.dto.request.UpdateUserProfileRequest;
+import com.tablehub.thbackend.dto.response.AchievementDto;
+import com.tablehub.thbackend.dto.response.RewardDto;
+import com.tablehub.thbackend.dto.response.UserProfileResponse;
+import com.tablehub.thbackend.dto.response.UserStatsDto;
+import com.tablehub.thbackend.model.AppUser;
+import com.tablehub.thbackend.repo.ActionRepository;
+import com.tablehub.thbackend.repo.UserRepository;
+import com.tablehub.thbackend.service.interfaces.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository userRepository;
+    private final ActionRepository actionRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Override
+    @Transactional
+    public void changePassword(String username, ChangePasswordRequest request) {
+        AppUser user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Current password does not match");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserProfileResponse getUserProfile(String username) {
+        AppUser user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        return new UserProfileResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public UserProfileResponse updateUserProfile(String username, UpdateUserProfileRequest request) {
+        AppUser user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        if (request.getEmail() != null && !request.getEmail().isBlank()) {
+            user.setEmail(request.getEmail());
+        }
+
+        if (request.getName() != null && !request.getName().isBlank()) {
+            user.setName(request.getName());
+        }
+
+        AppUser updatedUser = userRepository.save(user);
+        return new UserProfileResponse(updatedUser);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AchievementDto> getAchievements() {
+        return actionRepository.findAll().stream()
+                .map(AchievementDto::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserStatsDto getUserStats(String username) {
+        AppUser user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        long ranking = userRepository.countByPointsGreaterThan(user.getPoints()) + 1;
+
+        int reportsCount = user.getPointsActions() != null ? user.getPointsActions().size() : 0;
+
+        return new UserStatsDto(
+                user.getPoints(),
+                reportsCount,
+                (int) ranking
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RewardDto> getUserRewards(String username) {
+        // Placeholder until Reward entity is created
+        return Collections.emptyList();
+    }
+
+    @Override
+    @Transactional
+    public void redeemReward(String username, Long rewardId) {
+        AppUser user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        // Logic pending Reward entity implementation
+    }
 }
