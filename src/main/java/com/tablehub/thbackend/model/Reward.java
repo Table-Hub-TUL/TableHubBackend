@@ -18,9 +18,12 @@ public class Reward {
     private String title;
 
     @Column(columnDefinition = "TEXT")
-    private String description;
+    private String additionalDescription;
 
-    private String imageUrl;
+    private String image;
+
+    @Column(nullable = false)
+    private int cost;
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id")

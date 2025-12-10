@@ -46,6 +46,10 @@ public class AppUser {
     @Column(nullable = false)
     private int points = 0;
 
+    @Column(nullable = false)
+    private int lifetimePoints = 0;
+
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserStatus status = UserStatus.ACTIVE;

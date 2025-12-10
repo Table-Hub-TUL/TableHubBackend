@@ -10,6 +10,5 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<AppUser, Long> {
     Optional<AppUser> findByUserName(String userName);
     Boolean existsByUserName(String userName);
-
-    long countByPointsGreaterThan(int points);
+    long countByLifetimePointsGreaterThan(int lifetimePoints);
 }

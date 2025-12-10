@@ -4,7 +4,6 @@ INSERT INTO role (name) VALUES ('ROLE_ADMIN') ON CONFLICT (name) DO NOTHING;
 INSERT INTO role (name) VALUES ('ROLE_USER') ON CONFLICT (name) DO NOTHING;
 INSERT INTO role (name) VALUES ('ROLE_OWNER') ON CONFLICT (name) DO NOTHING;
 
-
 INSERT INTO address (street_number, apartment_number, street, city, postal_code, country)
 VALUES
     (15, NULL, 'ul. Piotrkowska', 'Łódź', '90-001', 'Polska'),
@@ -55,9 +54,15 @@ VALUES
     (7, 'AVAILABLE', 1.0, 10.0, 2),
     (7, 'AVAILABLE', 1.0, 20.0, 4);
 
-INSERT INTO users (user_name, password, email, registered_at, points, status)
-VALUES ('admin', '$2a$12$Tuxry0MXlpH53itkfLGrcecUjXq1KdCSpixRssVnRsalOi.yGjhhK', 'admin@tablehub.com', NOW(), 0, 'ACTIVE');
+INSERT INTO users (user_name, password, email, registered_at, points, lifetime_points, status)
+VALUES ('admin', '$2a$12$Tuxry0MXlpH53itkfLGrcecUjXq1KdCSpixRssVnRsalOi.yGjhhK', 'admin@tablehub.com', NOW(), 0, 0, 'ACTIVE');
 
 INSERT INTO users_roles (roles_id, app_user_id)
 VALUES ((SELECT id FROM role WHERE name = 'ROLE_ADMIN'), 1)
     ON CONFLICT (roles_id, app_user_id) DO NOTHING;
+
+INSERT INTO action (name, points) VALUES ('REPORT_NEW', 10) ON CONFLICT (name) DO NOTHING;
+INSERT INTO action (name, points) VALUES ('VALIDATE', 2) ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO reward (title, additional_description, image, cost, restaurant_id)
+VALUES ('Free Coffee', '100 points to redeem', 'coffee.jpg', 50,1);

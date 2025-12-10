@@ -6,9 +6,14 @@ import com.tablehub.thbackend.dto.response.AchievementDto;
 import com.tablehub.thbackend.dto.response.RewardDto;
 import com.tablehub.thbackend.dto.response.UserProfileResponse;
 import com.tablehub.thbackend.dto.response.UserStatsDto;
+import com.tablehub.thbackend.dto.types.AddressDto;
 import com.tablehub.thbackend.model.AppUser;
+import com.tablehub.thbackend.model.Reward;
+import com.tablehub.thbackend.model.UserReward;
 import com.tablehub.thbackend.repo.ActionRepository;
+import com.tablehub.thbackend.repo.RewardRepository;
 import com.tablehub.thbackend.repo.UserRepository;
+import com.tablehub.thbackend.repo.UserRewardRepository;
 import com.tablehub.thbackend.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,7 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +30,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final ActionRepository actionRepository;
+    private final RewardRepository rewardRepository;
+    private final UserRewardRepository userRewardRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -82,30 +88,61 @@ public class UserServiceImpl implements UserService {
         AppUser user = userRepository.findByUserName(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        long ranking = userRepository.countByPointsGreaterThan(user.getPoints()) + 1;
+        long ranking = userRepository.countByLifetimePointsGreaterThan(user.getLifetimePoints()) + 1;
 
         int reportsCount = user.getPointsActions() != null ? user.getPointsActions().size() : 0;
 
-        return new UserStatsDto(
-                user.getPoints(),
-                reportsCount,
-                (int) ranking
-        );
+        return new UserStatsDto(user.getPoints(), reportsCount, (int) ranking);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<RewardDto> getUserRewards(String username) {
-        // Placeholder until Reward entity is created
-        return Collections.emptyList();
+        AppUser user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return userRewardRepository.findAllByUser(user).stream()
+                .map(ur -> new RewardDto(
+                        ur.getId(),
+                        ur.getReward().getTitle(),
+                        ur.getReward().getAdditionalDescription(),
+                        ur.getReward().getImage(),
+                        ur.getReward().getRestaurant().getName(),
+                        new AddressDto(
+                                ur.getReward().getRestaurant().getAddress().getStreetNumber(),
+                                ur.getReward().getRestaurant().getAddress().getStreet(),
+                                ur.getReward().getRestaurant().getAddress().getApartmentNumber(),
+                                ur.getReward().getRestaurant().getAddress().getCity(),
+                                ur.getReward().getRestaurant().getAddress().getPostalCode(),
+                                ur.getReward().getRestaurant().getAddress().getCountry()
+                        ),
+                        ur.isRedeemed()
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
     public void redeemReward(String username, Long rewardId) {
         AppUser user = userRepository.findByUserName(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // Logic pending Reward entity implementation
+        Reward rewardDefinition = rewardRepository.findById(rewardId)
+                .orElseThrow(() -> new IllegalArgumentException("Reward definition not found"));
+
+        if (user.getPoints() < rewardDefinition.getCost()) {
+            throw new IllegalArgumentException("Insufficient points to redeem this reward.");
+        }
+
+        user.setPoints(user.getPoints() - rewardDefinition.getCost());
+        userRepository.save(user);
+
+        UserReward newUserReward = UserReward.builder()
+                .user(user)
+                .reward(rewardDefinition)
+                .redeemed(false)
+                .build();
+
+        userRewardRepository.save(newUserReward);
     }
 }

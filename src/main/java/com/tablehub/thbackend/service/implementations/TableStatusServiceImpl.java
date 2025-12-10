@@ -102,7 +102,11 @@ public class TableStatusServiceImpl implements TableStatusService {
                         .points((short) actionType.getDefaultPoints())
                         .build()));
 
-        user.setPoints(user.getPoints() + action.getPoints());
+        int pointsEarned = action.getPoints();
+
+        user.setPoints(user.getPoints() + pointsEarned); // points to spend
+        user.setLifetimePoints(user.getLifetimePoints() + pointsEarned); // ranking
+
         userRepository.save(user);
 
         PointsAction history = PointsAction.builder()
@@ -111,5 +115,8 @@ public class TableStatusServiceImpl implements TableStatusService {
                 .timestamp(OffsetDateTime.now())
                 .build();
         pointsActionRepository.save(history);
+
+        logger.info("Awarded {} points to user {}. Total: {}, Lifetime: {}",
+                pointsEarned, user.getUserName(), user.getPoints(), user.getLifetimePoints());
     }
 }
