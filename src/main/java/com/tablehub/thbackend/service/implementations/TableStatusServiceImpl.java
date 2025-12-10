@@ -5,16 +5,22 @@ import com.tablehub.thbackend.dto.internal.TableUpdateJob;
 import com.tablehub.thbackend.dto.request.TableUpdateRequest;
 import com.tablehub.thbackend.exception.InvalidTableDataException;
 import com.tablehub.thbackend.exception.TableNotFoundException;
-import com.tablehub.thbackend.model.RestaurantTable;
+import com.tablehub.thbackend.model.*;
+import com.tablehub.thbackend.repo.ActionRepository;
+import com.tablehub.thbackend.repo.PointsActionRepository;
 import com.tablehub.thbackend.repo.RestaurantTableRepository;
+import com.tablehub.thbackend.repo.UserRepository;
 import com.tablehub.thbackend.service.interfaces.TableStatusService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.OffsetDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +31,13 @@ public class TableStatusServiceImpl implements TableStatusService {
     private final RestaurantTableRepository tableRepository;
     private final RabbitTemplate rabbitTemplate;
     private final SimpMessagingTemplate messagingTemplate;
+
+    private final ActionRepository actionRepository;
+    private final PointsActionRepository pointsActionRepository;
+    private final UserRepository userRepository;
+    private static final int MAX_CONFIDENCE = 100;
+    private static final int CONFIDENCE_INCREMENT = 10;
+
 
     @Override
     @Transactional
@@ -40,13 +53,30 @@ public class TableStatusServiceImpl implements TableStatusService {
             throw new InvalidTableDataException("Invalid section or restaurant");
         }
 
-        // --- TODO: Add Points Logic Here ---
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        AppUser user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
+        boolean isStatusChange = table.getStatus() != request.getRequestedStatus();
 
-        table.setStatus(request.getRequestedStatus());
+
+        ActionType actionType;
+
+        if (isStatusChange) {
+            actionType = ActionType.REPORT_NEW;
+
+            table.setStatus(request.getRequestedStatus());
+            table.setConfidenceScore(MAX_CONFIDENCE);
+        } else {
+            actionType = ActionType.VALIDATE;
+
+            table.setConfidenceScore(Math.min(MAX_CONFIDENCE, table.getConfidenceScore() + CONFIDENCE_INCREMENT));
+        }
+
+        table.setLastUpdated(OffsetDateTime.now());
         tableRepository.save(table);
         logger.info("Successfully saved status for table ID: {} to {}", request.getTableId(), table.getStatus());
 
-        // --- TODO: If points awarded, save PointsAction entity ---
+        awardPoints(user, actionType);
 
         TableUpdateRequest notificationPayload = new TableUpdateRequest();
         notificationPayload.setRestaurantId(request.getRestaurantId());
@@ -63,5 +93,23 @@ public class TableStatusServiceImpl implements TableStatusService {
         TableUpdateJob job = new TableUpdateJob(restaurantId);
         rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE_NAME, RabbitConfig.ROUTING_KEY, job);
         logger.info("Dispatched aggregate update job for restaurant ID: {}", restaurantId);
+    }
+
+    private void awardPoints(AppUser user, ActionType actionType) {
+        Action action = actionRepository.findByName(actionType)
+                .orElseGet(() -> actionRepository.save(Action.builder()
+                        .name(actionType)
+                        .points((short) actionType.getDefaultPoints())
+                        .build()));
+
+        user.setPoints(user.getPoints() + action.getPoints());
+        userRepository.save(user);
+
+        PointsAction history = PointsAction.builder()
+                .user(user)
+                .action(action)
+                .timestamp(OffsetDateTime.now())
+                .build();
+        pointsActionRepository.save(history);
     }
 }

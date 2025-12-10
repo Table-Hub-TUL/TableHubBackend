@@ -6,6 +6,8 @@ import lombok.*;
 
 import jakarta.persistence.*;
 
+import java.time.OffsetDateTime;
+
 @Entity
 @Table(name = "restaurant_table")
 @Data
@@ -35,4 +37,11 @@ public class RestaurantTable {
 
     @Column(nullable = false)
     private Integer capacity;
+
+    @Column(name = "confidence_score", nullable = false)
+    @Builder.Default
+    private int confidenceScore = 0;
+
+    @Column(name = "last_updated")
+    private OffsetDateTime lastUpdated;
 }
