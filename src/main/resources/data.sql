@@ -65,4 +65,4 @@ INSERT INTO action (name, points) VALUES ('REPORT_NEW', 10) ON CONFLICT (name) D
 INSERT INTO action (name, points) VALUES ('VALIDATE', 2) ON CONFLICT (name) DO NOTHING;
 
 INSERT INTO reward (title, additional_description, image, cost, restaurant_id)
-VALUES ('Free Coffee', '100 points to redeem', 'coffee.jpg', 50,1);
+VALUES ('Free Coffee', '50 points to redeem', 'coffee.jpg', 50,1);
