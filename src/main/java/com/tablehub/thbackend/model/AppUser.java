@@ -38,16 +38,23 @@ public class AppUser {
     private String name;
 
     @ManyToMany(fetch = FetchType.EAGER)
+    @Builder.Default
     private Set<Role> roles = new HashSet<>();
 
     @Column(name = "registered_at")
     private OffsetDateTime registeredAt;
 
     @Column(nullable = false)
+    @Builder.Default
     private int points = 0;
+
+    @Column(name = "lifetime_points", nullable = false)
+    @Builder.Default
+    private int lifetimePoints = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private UserStatus status = UserStatus.ACTIVE;
 
     @OneToMany(mappedBy = "user")

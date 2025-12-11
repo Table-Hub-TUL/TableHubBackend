@@ -296,6 +296,7 @@ public class AuthController {
             roles.add(userRole);
             user.setRoles(roles);
             user.setPoints(0);
+            user.setLifetimePoints(0);
             user.setRegisteredAt(OffsetDateTime.now());
 
             userRepository.save(user);

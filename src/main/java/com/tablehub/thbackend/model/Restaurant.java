@@ -35,6 +35,7 @@ public class Restaurant {
     private Point location;
 
     @Column(nullable = false)
+    @Builder.Default
     private Double rating = 0.0;
 
     @OneToMany(mappedBy = "restaurant")
