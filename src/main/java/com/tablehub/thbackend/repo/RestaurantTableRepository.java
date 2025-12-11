@@ -4,14 +4,15 @@ import com.tablehub.thbackend.model.RestaurantSection;
 import com.tablehub.thbackend.model.RestaurantTable;
 import com.tablehub.thbackend.model.TableStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface RestaurantTableRepository extends JpaRepository<RestaurantTable, Long> {
-
 
     @Query("SELECT rt FROM RestaurantTable rt " +
             "JOIN FETCH rt.restaurantSection rs " +
@@ -33,5 +34,14 @@ public interface RestaurantTableRepository extends JpaRepository<RestaurantTable
     );
 
     List<RestaurantTable> findByRestaurantSection(RestaurantSection section);
-}
 
+    @Modifying
+    @Query("UPDATE RestaurantTable t SET " +
+            "t.confidenceScore = CASE WHEN (t.confidenceScore + :increment) > :maxConfidence THEN :maxConfidence ELSE (t.confidenceScore + :increment) END, " +
+            "t.lastUpdated = :lastUpdated " +
+            "WHERE t.id = :id")
+    void incrementConfidenceScore(@Param("id") Long id,
+                                  @Param("increment") int increment,
+                                  @Param("maxConfidence") int maxConfidence,
+                                  @Param("lastUpdated") OffsetDateTime lastUpdated);
+}

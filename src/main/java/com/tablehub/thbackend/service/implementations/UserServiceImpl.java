@@ -7,7 +7,9 @@ import com.tablehub.thbackend.dto.response.RewardDto;
 import com.tablehub.thbackend.dto.response.UserProfileResponse;
 import com.tablehub.thbackend.dto.response.UserStatsDto;
 import com.tablehub.thbackend.dto.types.AddressDto;
+import com.tablehub.thbackend.model.Address;
 import com.tablehub.thbackend.model.AppUser;
+import com.tablehub.thbackend.model.Restaurant;
 import com.tablehub.thbackend.model.Reward;
 import com.tablehub.thbackend.model.UserReward;
 import com.tablehub.thbackend.repo.ActionRepository;
@@ -102,22 +104,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return userRewardRepository.findAllByUser(user).stream()
-                .map(ur -> new RewardDto(
-                        ur.getId(),
-                        ur.getReward().getTitle(),
-                        ur.getReward().getAdditionalDescription(),
-                        ur.getReward().getImage(),
-                        ur.getReward().getRestaurant().getName(),
-                        new AddressDto(
-                                ur.getReward().getRestaurant().getAddress().getStreetNumber(),
-                                ur.getReward().getRestaurant().getAddress().getStreet(),
-                                ur.getReward().getRestaurant().getAddress().getApartmentNumber(),
-                                ur.getReward().getRestaurant().getAddress().getCity(),
-                                ur.getReward().getRestaurant().getAddress().getPostalCode(),
-                                ur.getReward().getRestaurant().getAddress().getCountry()
-                        ),
-                        ur.isRedeemed()
-                ))
+                .map(this::mapToRewardDto)
                 .collect(Collectors.toList());
     }
 
@@ -130,12 +117,13 @@ public class UserServiceImpl implements UserService {
         Reward rewardDefinition = rewardRepository.findById(rewardId)
                 .orElseThrow(() -> new IllegalArgumentException("Reward definition not found"));
 
-        if (user.getPoints() < rewardDefinition.getCost()) {
+        int rowsUpdated = userRepository.deductPoints(user.getId(), rewardDefinition.getCost());
+
+        if (rowsUpdated == 0) {
             throw new IllegalArgumentException("Insufficient points to redeem this reward.");
         }
 
         user.setPoints(user.getPoints() - rewardDefinition.getCost());
-        userRepository.save(user);
 
         UserReward newUserReward = UserReward.builder()
                 .user(user)
@@ -144,5 +132,35 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         userRewardRepository.save(newUserReward);
+    }
+
+    private RewardDto mapToRewardDto(UserReward ur) {
+        Reward reward = ur.getReward();
+        Restaurant restaurant = reward.getRestaurant();
+
+        String restaurantName = (restaurant != null) ? restaurant.getName() : "Unknown Restaurant";
+        AddressDto addressDto = null;
+
+        if (restaurant != null && restaurant.getAddress() != null) {
+            Address a = restaurant.getAddress();
+            addressDto = new AddressDto(
+                    a.getStreetNumber(),
+                    a.getStreet(),
+                    a.getApartmentNumber(),
+                    a.getCity(),
+                    a.getPostalCode(),
+                    a.getCountry()
+            );
+        }
+
+        return new RewardDto(
+                ur.getId(),
+                reward.getTitle(),
+                reward.getAdditionalDescription(),
+                reward.getImage(),
+                restaurantName,
+                addressDto,
+                ur.isRedeemed()
+        );
     }
 }

@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -58,23 +59,25 @@ public class TableStatusServiceImpl implements TableStatusService {
                 .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
         boolean isStatusChange = table.getStatus() != request.getRequestedStatus();
 
-
         ActionType actionType;
+        OffsetDateTime now = OffsetDateTime.now();
 
         if (isStatusChange) {
             actionType = ActionType.REPORT_NEW;
-
             table.setStatus(request.getRequestedStatus());
             table.setConfidenceScore(MAX_CONFIDENCE);
+            table.setLastUpdated(now);
+            tableRepository.save(table);
         } else {
             actionType = ActionType.VALIDATE;
 
+            tableRepository.incrementConfidenceScore(table.getId(), CONFIDENCE_INCREMENT, MAX_CONFIDENCE, now);
+
             table.setConfidenceScore(Math.min(MAX_CONFIDENCE, table.getConfidenceScore() + CONFIDENCE_INCREMENT));
+            table.setLastUpdated(now);
         }
 
-        table.setLastUpdated(OffsetDateTime.now());
-        tableRepository.save(table);
-        logger.info("Successfully saved status for table ID: {} to {}", request.getTableId(), table.getStatus());
+        logger.info("Successfully saved status for table ID: {} to {}", request.getTableId(), request.getRequestedStatus());
 
         awardPoints(user, actionType);
 
@@ -82,7 +85,7 @@ public class TableStatusServiceImpl implements TableStatusService {
         notificationPayload.setRestaurantId(request.getRestaurantId());
         notificationPayload.setSectionId(request.getSectionId());
         notificationPayload.setTableId(request.getTableId());
-        notificationPayload.setRequestedStatus(table.getStatus());
+        notificationPayload.setRequestedStatus(request.getRequestedStatus());
 
         String individualTopic = "/topic/table-updates/" + request.getRestaurantId();
         messagingTemplate.convertAndSend(individualTopic, notificationPayload);
@@ -96,18 +99,25 @@ public class TableStatusServiceImpl implements TableStatusService {
     }
 
     private void awardPoints(AppUser user, ActionType actionType) {
-        Action action = actionRepository.findByName(actionType)
-                .orElseGet(() -> actionRepository.save(Action.builder()
-                        .name(actionType)
-                        .points((short) actionType.getDefaultPoints())
-                        .build()));
+        Action action;
+        try {
+            action = actionRepository.findByName(actionType)
+                    .orElseGet(() -> actionRepository.save(Action.builder()
+                            .name(actionType)
+                            .points((short) actionType.getDefaultPoints())
+                            .build()));
+        } catch (DataIntegrityViolationException e) {
+            logger.warn("Concurrent Action creation detected for type: {}. Retrying fetch.", actionType);
+            action = actionRepository.findByName(actionType)
+                    .orElseThrow(() -> new IllegalStateException("Action could not be found or created", e));
+        }
 
         int pointsEarned = action.getPoints();
 
-        user.setPoints(user.getPoints() + pointsEarned); // points to spend
-        user.setLifetimePoints(user.getLifetimePoints() + pointsEarned); // ranking
+        userRepository.incrementPoints(user.getId(), pointsEarned);
 
-        userRepository.save(user);
+        user.setPoints(user.getPoints() + pointsEarned);
+        user.setLifetimePoints(user.getLifetimePoints() + pointsEarned);
 
         PointsAction history = PointsAction.builder()
                 .user(user)
