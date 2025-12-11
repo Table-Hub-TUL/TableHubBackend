@@ -16,8 +16,8 @@ public class AchievementDto {
 
     public AchievementDto(Action action) {
         this.id = action.getId();
-        this.title = action.getName();
+        this.title = action.getName().name();
         this.points = (long) action.getPoints();
-        this.emoji = null; // Default or map based on naming convention
+        this.emoji = null;
     }
 }
