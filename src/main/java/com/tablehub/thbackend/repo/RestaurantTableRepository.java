@@ -44,4 +44,15 @@ public interface RestaurantTableRepository extends JpaRepository<RestaurantTable
                                   @Param("increment") int increment,
                                   @Param("maxConfidence") int maxConfidence,
                                   @Param("lastUpdated") OffsetDateTime lastUpdated);
+
+    @Modifying
+    @Query("UPDATE RestaurantTable t SET t.confidenceScore = t.confidenceScore - :decayAmount " +
+            "WHERE t.status <> :unknownStatus AND t.confidenceScore > 0")
+    void decrementConfidenceForActiveTables(@Param("decayAmount") int decayAmount,
+                                            @Param("unknownStatus") TableStatus unknownStatus);
+
+    @Modifying
+    @Query("UPDATE RestaurantTable t SET t.status = :unknownStatus, t.confidenceScore = 0 " +
+            "WHERE t.status <> :unknownStatus AND t.confidenceScore <= 0")
+    void resetExpiredTables(@Param("unknownStatus") TableStatus unknownStatus);
 }
