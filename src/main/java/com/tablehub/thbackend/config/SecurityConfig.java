@@ -79,7 +79,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/media/**",
                                 "/**",
                                 "/?v-r=init&**",
                                 "/favicon.ico",
