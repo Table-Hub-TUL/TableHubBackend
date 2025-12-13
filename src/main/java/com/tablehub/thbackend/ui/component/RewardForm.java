@@ -7,10 +7,11 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeLabel;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -18,9 +19,15 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.shared.Registration;
 
-public class RewardForm extends FormLayout {
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+public class RewardForm extends Div {
 
     private final ImageStorageService imageStorageService;
 
@@ -28,13 +35,12 @@ public class RewardForm extends FormLayout {
     TextArea additionalDescription = new TextArea("Description");
     IntegerField cost = new IntegerField("Cost (Points)");
 
-    // Image fields
     private String currentImageUrl;
-    private String currentImageName;
+    private final com.vaadin.flow.component.html.Image imagePreview = new com.vaadin.flow.component.html.Image();
+    private final Div imageContainer = new Div();
 
     MemoryBuffer buffer = new MemoryBuffer();
     Upload upload = new Upload(buffer);
-    Div imagePreview = new Div();
 
     Binder<Reward> binder = new Binder<>(Reward.class);
 
@@ -46,32 +52,123 @@ public class RewardForm extends FormLayout {
         this.imageStorageService = imageStorageService;
         addClassName("reward-form");
 
-        configureUpload();
+        getStyle().set("padding", "20px");
+        getStyle().set("background-color", "var(--lumo-base-color)");
+        getStyle().set("height", "100%");
+        getStyle().set("box-sizing", "border-box");
+        getStyle().set("display", "flex");
+        getStyle().set("flex-direction", "column");
+        getStyle().set("gap", "var(--lumo-space-m)");
 
-        binder.bindInstanceFields(this);
+        configureFields();
+        configureImageArea();
+        bindFields();
 
-        add(title,
-                additionalDescription,
-                cost,
-                new Div(new NativeLabel("Reward Image"), upload, imagePreview),
-                createButtonsLayout());
+        add(title, cost, additionalDescription);
+        add(new NativeLabel("Reward Image"));
+        add(imageContainer, upload);
+        add(createButtonsLayout());
     }
 
-    private void configureUpload() {
-        upload.setAcceptedFileTypes("image/jpeg", "image/png", "image/gif");
-        upload.setMaxFileSize(5 * 1024 * 1024); // 5MB limit
+    private void configureFields() {
+        title.setWidthFull();
+        title.setPlaceholder("e.g., Free Coffee");
+
+        cost.setWidthFull();
+        cost.setMin(0);
+        cost.setStepButtonsVisible(true);
+
+        additionalDescription.setWidthFull();
+        additionalDescription.setMinHeight("100px");
+    }
+
+    private void configureImageArea() {
+        imageContainer.setWidth("100%");
+        imageContainer.setHeight("200px");
+        imageContainer.getStyle().set("background-color", "var(--lumo-contrast-5pct)");
+        imageContainer.getStyle().set("border-radius", "var(--lumo-border-radius-m)");
+        imageContainer.getStyle().set("display", "flex");
+        imageContainer.getStyle().set("align-items", "center");
+        imageContainer.getStyle().set("justify-content", "center");
+        imageContainer.getStyle().set("overflow", "hidden");
+        imageContainer.getStyle().set("border", "1px dashed var(--lumo-contrast-20pct)");
+        imageContainer.getStyle().set("position", "relative");
+
+        imagePreview.setWidth("100%");
+        imagePreview.setHeight("100%");
+        imagePreview.getStyle().set("object-fit", "cover");
+        imagePreview.setVisible(false);
+
+        Span placeholder = new Span("No Image Selected");
+        placeholder.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        placeholder.getStyle().set("pointer-events", "none");
+
+        imageContainer.add(imagePreview, placeholder);
+
+        upload.setAcceptedFileTypes("image/jpeg", "image/png", "image/webp", "image/gif");
+        upload.setMaxFiles(1);
+        upload.setDropLabel(new Span("Drop file here"));
 
         upload.addSucceededListener(event -> {
             try {
                 String url = imageStorageService.store(buffer.getInputStream(), event.getFileName());
                 this.currentImageUrl = url;
-                this.currentImageName = event.getFileName();
-                imagePreview.setText("Uploaded: " + event.getFileName());
-                Notification.show("Image uploaded successfully");
+
+                updatePreview(url);
+
+                Notification.show("Upload successful").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } catch (Exception e) {
-                Notification.show("Upload failed: " + e.getMessage());
+                Notification.show("Upload failed: " + e.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
+    }
+
+    private void updatePreview(String url) {
+        if (url != null && !url.isBlank()) {
+            // Logic to convert "/media/filename.jpg" -> File Stream
+            // This bypasses HTTP static resource issues
+            StreamResource resource = new StreamResource("preview-" + System.currentTimeMillis(), () -> {
+                try {
+                    // Extract filename from URL (assuming /media/filename format)
+                    String filename = url.substring(url.lastIndexOf("/") + 1);
+                    Path path = Paths.get("/media", filename);
+                    return new FileInputStream(path.toFile());
+                } catch (FileNotFoundException e) {
+                    return null;
+                }
+            });
+
+            imagePreview.setSrc(resource);
+            imagePreview.setVisible(true);
+
+            imageContainer.getChildren()
+                    .filter(c -> c instanceof Span)
+                    .findFirst()
+                    .ifPresent(c -> c.setVisible(false));
+
+            imageContainer.getStyle().set("border", "none");
+        } else {
+            imagePreview.setVisible(false);
+            imageContainer.getChildren()
+                    .filter(c -> c instanceof Span)
+                    .findFirst()
+                    .ifPresent(c -> c.setVisible(true));
+
+            imageContainer.getStyle().set("border", "1px dashed var(--lumo-contrast-20pct)");
+        }
+    }
+
+    private void bindFields() {
+        binder.forField(title)
+                .asRequired("Title is required")
+                .bind(Reward::getTitle, Reward::setTitle);
+
+        binder.forField(cost)
+                .asRequired("Cost is required")
+                .withValidator(c -> c != null && c >= 0, "Cost must be positive")
+                .bind(Reward::getCost, Reward::setCost);
+
+        binder.bind(additionalDescription, Reward::getAdditionalDescription, Reward::setAdditionalDescription);
     }
 
     private HorizontalLayout createButtonsLayout() {
@@ -87,16 +184,13 @@ public class RewardForm extends FormLayout {
     }
 
     private void validateAndSave() {
-        if (binder.isValid()) {
+        if (binder.validate().isOk()) {
             Reward reward = binder.getBean();
-            // Construct the Image object
+            // Map the image URL to the entity
             if (currentImageUrl != null) {
-                Image img = new Image();
-                img.setUrl(currentImageUrl);
-                img.setAltText(title.getValue()); // Default alt text to title
-                // In a real scenario, you might calculate ratio from the BufferedImage
-                img.setRatio(1.0);
-                reward.setImage(img);
+                if (reward.getImage() == null) reward.setImage(new Image());
+                reward.getImage().setUrl(currentImageUrl);
+                reward.getImage().setRatio(1.0);
             }
             fireEvent(new SaveEvent(this, reward));
         }
@@ -104,16 +198,17 @@ public class RewardForm extends FormLayout {
 
     public void setReward(Reward reward) {
         binder.setBean(reward);
+        upload.clearFileList();
+
         if (reward != null && reward.getImage() != null) {
-            currentImageUrl = reward.getImage().getUrl();
-            imagePreview.setText("Current image: " + reward.getImage().getUrl());
+            this.currentImageUrl = reward.getImage().getUrl();
+            updatePreview(this.currentImageUrl);
         } else {
-            currentImageUrl = null;
-            imagePreview.setText("");
+            this.currentImageUrl = null;
+            updatePreview(null);
         }
     }
 
-    // Events
     public static abstract class RewardFormEvent extends ComponentEvent<RewardForm> {
         private Reward reward;
         protected RewardFormEvent(RewardForm source, Reward reward) {
