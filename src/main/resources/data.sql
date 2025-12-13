@@ -59,10 +59,11 @@ VALUES ('admin', '$2a$12$Tuxry0MXlpH53itkfLGrcecUjXq1KdCSpixRssVnRsalOi.yGjhhK',
 
 INSERT INTO users_roles (roles_id, app_user_id)
 VALUES ((SELECT id FROM role WHERE name = 'ROLE_ADMIN'), 1)
-    ON CONFLICT (roles_id, app_user_id) DO NOTHING;
+ON CONFLICT (roles_id, app_user_id) DO NOTHING;
 
 INSERT INTO action (name, points) VALUES ('REPORT_NEW', 10) ON CONFLICT (name) DO NOTHING;
 INSERT INTO action (name, points) VALUES ('VALIDATE', 2) ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO reward (title, additional_description, image, cost, restaurant_id)
-VALUES ('Free Coffee', '50 points to redeem', 'coffee.jpg', 50,1);
+-- Updated to map 'image' fields correctly
+INSERT INTO reward (title, additional_description, image_url, image_alt_text, cost, restaurant_id)
+VALUES ('Free Coffee', '50 points to redeem', 'coffee.jpg', 'Free Coffee', 50, 1);

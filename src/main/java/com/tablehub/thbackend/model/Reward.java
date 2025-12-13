@@ -20,7 +20,13 @@ public class Reward {
     @Column(columnDefinition = "TEXT")
     private String additionalDescription;
 
-    private String image;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "url", column = @Column(name = "image_url")),
+            @AttributeOverride(name = "altText", column = @Column(name = "image_alt_text")),
+            @AttributeOverride(name = "ratio", column = @Column(name = "image_ratio"))
+    })
+    private Image image;
 
     @Column(nullable = false)
     private int cost;

@@ -54,17 +54,25 @@ public class RestaurantAdminView extends VerticalLayout {
 
     private void configureGrid() {
         grid.setColumns("id", "name");
-        grid.addColumn(r -> r.getAddress() != null ? r.getAddress().getCity() : "N/A").setHeader("City");
-        grid.addColumn(r -> r.getCuisineName()).setHeader("Cuisine");
-
-        grid.addComponentColumn(restaurant ->
-                new Button("Edit Layout", click -> {
-                    getUI().ifPresent(ui ->
-                            ui.navigate("admin/layout/" + restaurant.getId())
-                    );
-                })
-        ).setHeader("Layout");
-
+        grid.addColumn(r -> r.getAddress() != null ? r.getAddress().getCity() : "N/A")
+                .setHeader("City");
+        grid.addColumn(r -> r.getCuisineName())
+                .setHeader("Cuisine");
+        grid.addComponentColumn(restaurant -> {
+            HorizontalLayout buttons = new HorizontalLayout();
+            Button layoutBtn = new Button("Layout", click -> {
+                getUI().ifPresent(ui ->
+                        ui.navigate("admin/layout/" + restaurant.getId())
+                );
+            });
+            Button rewardsBtn = new Button("Rewards", click -> {
+                getUI().ifPresent(ui ->
+                        ui.navigate("admin/rewards/" + restaurant.getId())
+                );
+            });
+            buttons.add(layoutBtn, rewardsBtn);
+            return buttons;
+        }).setHeader("Actions");
         grid.asSingleSelect().addValueChangeListener(e ->
                 form.setRestaurant(e.getValue())
         );
