@@ -1,5 +1,6 @@
 package com.tablehub.thbackend.controller;
 
+import com.tablehub.thbackend.dto.request.ChangePasswordRequest;
 import com.tablehub.thbackend.dto.request.UpdateUserProfileRequest;
 import com.tablehub.thbackend.dto.response.AchievementDto;
 import com.tablehub.thbackend.dto.response.RewardDto;
@@ -16,7 +17,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +28,44 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+
+    // --- Profile Management Endpoints ---
+
+    @Operation(summary = "Get user profile", description = "Retrieves user details like name, email, and points")
+    @GetMapping("/{username}")
+    @PreAuthorize("#username == authentication.name")
+    public ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable String username) {
+        return ResponseEntity.ok(userService.getUserProfile(username));
+    }
+
+    @Operation(summary = "Update user profile", description = "Updates user name and email")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profile updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid email format")
+    })
+    @PostMapping("/{username}")
+    @PreAuthorize("#username == authentication.name")
+    public ResponseEntity<UserProfileResponse> updateUserProfile(
+            @PathVariable String username,
+            @Valid @RequestBody UpdateUserProfileRequest request) {
+        return ResponseEntity.ok(userService.updateUserProfile(username, request));
+    }
+
+    @Operation(summary = "Change password", description = "Updates the user's password")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Password changed successfully"),
+            @ApiResponse(responseCode = "400", description = "Incorrect current password")
+    })
+    @PostMapping("/{username}/password")
+    @PreAuthorize("#username == authentication.name")
+    public ResponseEntity<Void> changePassword(
+            @PathVariable String username,
+            @Valid @RequestBody ChangePasswordRequest request) {
+        userService.changePassword(username, request);
+        return ResponseEntity.ok().build();
+    }
+
+    // --- Stats & Rewards Endpoints ---
 
     @Operation(summary = "Get available achievements", description = "Retrieves a list of all system achievements")
     @GetMapping("/achievements")
