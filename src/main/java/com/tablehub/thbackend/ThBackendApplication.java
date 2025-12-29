@@ -17,6 +17,9 @@ public class ThBackendApplication {
         System.setProperty("JWT_TIME", dotenv.get("JWT_TIME"));
         System.setProperty("HEALTHCHECK_TOKEN", dotenv.get("HEALTHCHECK_TOKEN"));
         System.setProperty("JWT_REFRESH_TIME", dotenv.get("JWT_REFRESH_TIME"));
+        System.setProperty("MAIL_USERNAME", dotenv.get("MAIL_USERNAME"));
+        System.setProperty("MAIL_PASSWORD", dotenv.get("MAIL_PASSWORD"));
+        System.setProperty("MAIL_HOST", dotenv.get("MAIL_HOST"));
         SpringApplication.run(ThBackendApplication.class, args);
     }
 }

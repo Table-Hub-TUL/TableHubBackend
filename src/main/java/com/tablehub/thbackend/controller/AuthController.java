@@ -7,15 +7,14 @@ import com.tablehub.thbackend.dto.request.AuthLoginRequest;
 import com.tablehub.thbackend.dto.response.AuthMessageResponse;
 import com.tablehub.thbackend.dto.request.AuthSignUpRequest;
 import com.tablehub.thbackend.exception.TokenRefreshException;
-import com.tablehub.thbackend.model.AppUser;
-import com.tablehub.thbackend.model.RefreshToken;
-import com.tablehub.thbackend.model.Role;
-import com.tablehub.thbackend.model.RoleName;
+import com.tablehub.thbackend.model.*;
+import com.tablehub.thbackend.repo.PasswordResetTokenRepository;
 import com.tablehub.thbackend.repo.RoleRepository;
 import com.tablehub.thbackend.repo.UserRepository;
 import com.tablehub.thbackend.security.auth.UserPrinciple;
 import com.tablehub.thbackend.service.implementations.JwtService;
 import com.tablehub.thbackend.service.implementations.RefreshTokenService;
+import com.tablehub.thbackend.service.interfaces.MailingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -24,7 +23,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -43,9 +44,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")
@@ -60,6 +63,8 @@ public class AuthController {
     private final JwtService jwtProvider;
     private final RefreshTokenService refreshTokenService;
     private final UserDetailsPasswordService passwordService;
+    private final MailingService mailingService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Operation(
             summary = "Sign in user",
@@ -309,5 +314,49 @@ public class AuthController {
                     .body(new AuthMessageResponse("Error: Could not register user due to an internal error."));
         }
     }
+
+    @Operation(
+            summary = "Forgot password",
+            description = "Sends a password reset link to the user's registered email address."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Password reset link sent successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = AuthMessageResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User with the provided email not found",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad request - Invalid input",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody String email) {
+        log.info("Received password reset request for email '{}'", email);
+        AppUser user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            log.warn("Password reset failed: No user found with email '{}'", email);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new AuthMessageResponse("Error: No user found with the provided email."));
+        } else {
+            log.info("Password reset link sent to email '{}'", email);
+            String token = UUID.randomUUID().toString();
+            PasswordResetToken passwordResetToken = new PasswordResetToken(token, user, LocalDateTime.now().plusMinutes(15));
+            passwordResetTokenRepository.save(passwordResetToken);
+            mailingService.sendResetPasswordEmail(user.getEmail(), token);
+            return ResponseEntity.ok(new AuthMessageResponse("Password reset link sent successfully."));
+        }
+    }
+
+    
 }
 
