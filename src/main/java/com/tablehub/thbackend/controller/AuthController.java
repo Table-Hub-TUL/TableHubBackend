@@ -1,11 +1,8 @@
 package com.tablehub.thbackend.controller;
 
-import com.tablehub.thbackend.dto.request.ChangePasswordRequest;
-import com.tablehub.thbackend.dto.request.TokenRefreshRequest;
+import com.tablehub.thbackend.dto.request.*;
 import com.tablehub.thbackend.dto.response.AuthJwtResponse;
-import com.tablehub.thbackend.dto.request.AuthLoginRequest;
 import com.tablehub.thbackend.dto.response.AuthMessageResponse;
-import com.tablehub.thbackend.dto.request.AuthSignUpRequest;
 import com.tablehub.thbackend.exception.TokenRefreshException;
 import com.tablehub.thbackend.model.*;
 import com.tablehub.thbackend.repo.PasswordResetTokenRepository;
@@ -357,6 +354,22 @@ public class AuthController {
         }
     }
 
-    
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        String token = request.getToken();
+        PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(token).orElse(null);
+        if (passwordResetToken == null || passwordResetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            log.warn("Password reset failed: Invalid or expired token '{}'", token);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Forbidden: Invalid or expired token.");
+        } else {
+            AppUser user = passwordResetToken.getUser();
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            userRepository.save(user);
+            passwordResetTokenRepository.delete(passwordResetToken);
+            log.info("Password reset successful for user '{}'", user.getUserName());
+            return ResponseEntity.ok(new AuthMessageResponse("Password reset successful."));
+        }
+    }
+
 }
 
