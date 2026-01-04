@@ -1,6 +1,8 @@
 package com.tablehub.thbackend.repo;
 
 import com.tablehub.thbackend.model.AppUser;
+import io.jsonwebtoken.security.Jwks;
+import jakarta.validation.constraints.Email;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -22,4 +24,6 @@ public interface UserRepository extends JpaRepository<AppUser, Long> {
     @Modifying
     @Query("UPDATE AppUser u SET u.points = u.points - :cost WHERE u.id = :id AND u.points >= :cost")
     int deductPoints(@Param("id") Long id, @Param("cost") int cost);
+
+    Optional<AppUser> findByEmail(@Email String email);
 }
