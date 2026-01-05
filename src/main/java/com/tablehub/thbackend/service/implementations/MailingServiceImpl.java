@@ -14,7 +14,7 @@ public class MailingServiceImpl implements MailingService {
 
     private final JavaMailSender mailSender;
 
-    private static final String FROM_EMAIL = "noreply@tablehub.local";
+    private static final String FROM_EMAIL = "tablehub@mail.dmcs.pl";
     private static final String RESET_PASSWORD_SUBJECT = "TableHub - Reset Your Password";
     private static final String DEEPLINK_FORMAT = "tablehub://reset-password?token=%s";
 
