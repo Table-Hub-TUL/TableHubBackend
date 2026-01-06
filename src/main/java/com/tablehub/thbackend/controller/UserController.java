@@ -29,6 +29,18 @@ public class UserController {
 
     private final UserService userService;
 
+    @Operation(summary = "Get user profile", description = "Retrieves user profile details including email and name")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved profile", content = @Content(schema = @Schema(implementation = UserProfileResponse.class))),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied", content = @Content)
+    })
+    @GetMapping("/{username}/profile")
+    @PreAuthorize("#username == authentication.name")
+    public ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable String username) {
+        return ResponseEntity.ok(userService.getUserProfile(username));
+    }
+
     @Operation(summary = "Get available achievements", description = "Retrieves a list of all system achievements")
     @GetMapping("/achievements")
     public ResponseEntity<List<AchievementDto>> getAchievements() {
