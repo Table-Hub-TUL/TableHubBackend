@@ -2,6 +2,8 @@ package com.tablehub.thbackend.repo;
 
 import com.tablehub.thbackend.model.Restaurant;
 import com.tablehub.thbackend.model.RestaurantSection;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +16,9 @@ import java.util.Optional;
 
 @Repository
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long>, JpaSpecificationExecutor<Restaurant>, PagingAndSortingRepository<Restaurant, Long> {
+
+    @EntityGraph(attributePaths = {"sections", "sections.tables"})
+    List<Restaurant> findAll(Specification<Restaurant> spec);
 
     @Query("SELECT DISTINCT r FROM Restaurant r " +
             "LEFT JOIN FETCH r.sections " +

@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -70,6 +71,7 @@ public class RestaurantController {
                     )
             )
     })
+    @Transactional(readOnly = true)
     @GetMapping()
     public ResponseEntity<List<RestaurantSimpleResponse>> getFilteredRestaurants(
             @ParameterObject RestaurantFilterRequest criteria
