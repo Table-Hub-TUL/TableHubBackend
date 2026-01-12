@@ -1,9 +1,11 @@
 package com.tablehub.thbackend.service.implementations;
 
 import com.tablehub.thbackend.dto.request.RestaurantFilterRequest;
+import com.tablehub.thbackend.dto.response.RewardDto;
 import com.tablehub.thbackend.model.Restaurant;
 import com.tablehub.thbackend.model.RestaurantSection;
 import com.tablehub.thbackend.repo.RestaurantRepository;
+import com.tablehub.thbackend.repo.RewardRepository;
 import com.tablehub.thbackend.repo.spec.RestaurantSpecification;
 import com.tablehub.thbackend.service.interfaces.RestaurantDataService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,7 @@ import java.util.stream.Collectors;
 public class RestaurantDataServiceImpl implements RestaurantDataService {
 
     private final RestaurantRepository restaurantRepository;
-
+    private final RewardRepository rewardRepository;
     @Override
     public List<Restaurant> getAllRestaurants() {
         List<Restaurant> restaurants = restaurantRepository.findAllWithSections();
@@ -70,5 +72,21 @@ public class RestaurantDataServiceImpl implements RestaurantDataService {
         }
 
         return restaurant;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RewardDto> getRewardsForRestaurant(Long restaurantId) {
+        return rewardRepository.findAllByRestaurantId(restaurantId).stream()
+                .map(reward -> new RewardDto(
+                        reward.getId(),
+                        reward.getTitle(),
+                        reward.getAdditionalDescription(),
+                        reward.getImage(),
+                        reward.getRestaurant().getName(),
+                        null,
+                        false,
+                        reward.getCost()
+                )).collect(Collectors.toList());
     }
 }
