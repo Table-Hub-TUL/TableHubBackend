@@ -1,6 +1,7 @@
 package com.tablehub.thbackend.service.interfaces;
 
 import com.tablehub.thbackend.dto.request.RestaurantFilterRequest;
+import com.tablehub.thbackend.dto.response.RewardDto;
 import com.tablehub.thbackend.model.Restaurant;
 
 import java.util.List;
@@ -11,4 +12,6 @@ public interface RestaurantDataService {
     Optional<Restaurant> getRestaurantById(Long id);
 
     List<Restaurant> findRestaurantsByCriteria(RestaurantFilterRequest criteria);
+
+    List<RewardDto> getRewardsForRestaurant(Long restaurantId);
 }

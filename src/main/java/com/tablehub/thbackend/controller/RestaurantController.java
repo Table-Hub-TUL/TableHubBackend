@@ -139,4 +139,19 @@ public class RestaurantController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @Operation(
+            summary = "Get available rewards",
+            description = "Retrieves a list of all rewards available for purchase at a specific restaurant"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved rewards"),
+            @ApiResponse(responseCode = "404", description = "Restaurant not found (if you add checks)")
+    })
+    @GetMapping("/{restaurantId}/rewards")
+    public ResponseEntity<List<com.tablehub.thbackend.dto.response.RewardDto>> getRestaurantRewards(
+            @PathVariable Long restaurantId) {
+        logger.info("Fetching rewards for restaurant ID: {}", restaurantId);
+        return ResponseEntity.ok(restaurantDataService.getRewardsForRestaurant(restaurantId));
+    }
 }

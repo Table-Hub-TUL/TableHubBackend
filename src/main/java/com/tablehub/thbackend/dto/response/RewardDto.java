@@ -17,4 +17,5 @@ public class RewardDto {
     private String restaurantName;
     private AddressDto restaurantAddress;
     private boolean redeemed;
+    private int cost;
 }
