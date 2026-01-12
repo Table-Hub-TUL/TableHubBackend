@@ -160,7 +160,8 @@ public class UserServiceImpl implements UserService {
                 reward.getImage(),
                 restaurantName,
                 addressDto,
-                ur.isRedeemed()
+                ur.isRedeemed(),
+                reward.getCost()
         );
     }
 }
